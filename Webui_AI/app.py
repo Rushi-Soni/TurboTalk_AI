@@ -52,6 +52,10 @@ def chat():
             messages=[{"role": "user", "content": content}],
         )
         bot_response = response.choices[0].message.content if response.choices else "Sorry, I couldn't process your request."
+        
+        # Check if the bot response is the specific output
+        if "Thank you for using BLACKBOX.AI" in bot_response:
+            return jsonify({"response": "Please re-enter your message."})
     except Exception as e:
         logging.error("Error during chat completion: %s", str(e))
         bot_response = "There was a problem while processing your input. Please enter your message again."
@@ -63,4 +67,4 @@ def open_browser():
 
 if __name__ == '__main__':
     threading.Timer(1, open_browser).start()  # Open the browser after a short delay
-    app.run(host='0.0.0.0', port=8080, debug=True)  # Enable debug mode
+    app.run(host='0.0.0.0', port=8080, debug=False)  # Enable debug mode

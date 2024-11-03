@@ -59,7 +59,7 @@ def chat():
             return jsonify({"response": "Please re-enter your message after reloading the site ↻."})
     except Exception as e:
         logging.error("Error during chat completion: %s", str(e))
-        bot_response = "There was a problem while processing your input. Please enter your message again or reload the site and try again ↻."
+        bot_response = "There was a problem while processing your input. Please enter your message again or reload the site and try again later."
 
     return jsonify({"response": bot_response})
 

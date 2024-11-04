@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <title>TurboTalk</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
-        @keyframes gradient {
+       @keyframes gradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
@@ -281,6 +281,21 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
         }
+      
+        footer {
+            background-color: rgba(255, 255, 255, 0.1); /* Matches existing styles*/
+            backdrop-filter: blur(10px);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-dark); /* Ensures text is readable */
+            animation: slideIn 0.5s ease-out;/* Add animation if desired */
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: var(--transition);
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -314,6 +329,10 @@
             </div>
         </div>
     </div>
+
+    <footer>
+        <p>Get Technical Help with the <a href="mailto:rushisoni1209@gmail.com">e-mail us</a></p>
+    </footer>
 
     <script>
         $(document).ready(function () {

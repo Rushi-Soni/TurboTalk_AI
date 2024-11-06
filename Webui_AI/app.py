@@ -57,6 +57,8 @@ def chat():
         response = client.chat.completions.create(
             model="gpt-4o",  # Corrected model name
             messages=[{"role": "user", "content": content}],
+            best_of=10,
+            stream=True,
         )
         
         # Check if response contains error indicating connection issues with blackbox.ai

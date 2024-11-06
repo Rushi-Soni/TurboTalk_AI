@@ -55,7 +55,7 @@ def chat():
         bot_response = response.choices[0].message.content if response.choices else "Sorry, I couldn't process your request."
         
         # Check if the bot response is the specific output
-        if "BLACKBOX.AI" in response or "blackbox.ai" in response:
+        if "BLACKBOX" in response:
             return jsonify({"response": "Please re-enter your message after reloading the site ↻."})
     except Exception as e:
         logging.error("Error during chat completion: %s", str(e))

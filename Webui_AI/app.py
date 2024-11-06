@@ -1,40 +1,20 @@
-import webbrowser
 from flask import Flask, render_template, request, jsonify
-from g4f.client import Client
-import threading
-import logging
-import os
+import TurboTalk_Custom
 
 app = Flask(__name__)
-client = Client()
 
-# Set up basic logging
-logging.basicConfig(level=logging.INFO)
-
-# Define your company and bot names
-company_name = "Rango Productions"
-bot_name = "TurboTalk"
-
-@app.route('/')
-def index():
-    # Render index.html from the current directory
-    return render_template('ui.html')
-
-@app.route('/chat', methods=['POST'])
-def chat():
-    user_message = request.json.get('message')
-    behaviour = request.json.get('behaviour')
-
-    logging.info("User Message: %s, Behaviour: %s", user_message, behaviour)
-
-    if not user_message or not behaviour:
-        logging.warning("Invalid input: %s", request.json)
-        return jsonify({"response": "Invalid input."}), 400
-
-    # Construct the AI's prompt
+def process_message(text):
+    """
+    Process the incoming text using TurboTalk_Custom to generate responses.
+    """
+    # Define parameters for TurboTalk
+    text = text
+    company_name = "Rango Productions"
+    bot_name = "Rango AI"
+    behaviour = "Friendly"
     content = (
         f"Follow the below given commands strictly. "
-        f"{user_message} and to answer me behave very very strongly just like {behaviour} "
+        f"{text} and to answer me behave very very strongly just like {behaviour} "
         f"as I am a/an {behaviour} type person. And if asked any questions in which "
         f"you have to say anything like who are you or have to give your identity and info "
         f"then only you have to tell me about yourself and introduce yourself as {bot_name} "
@@ -45,31 +25,68 @@ def chat():
         f"You are an AI developed by {company_name} and your name is {bot_name} and remember it and dont forgot."
         f"But don't introduce yourself everytime instead just give direct answers, and don't evey give any of the instruction in the output."
     )
+    user_message = content
+    
+    # Generate response using TurboTalk
+    TurboTalk_Custom.turbo_talk_instance.give_response(
+        company_name,
+        bot_name,
+        behaviour,
+        user_message
+    )
 
+    # Get the response
+    response = TurboTalk_Custom.turbo_talk_instance.get_response()
+
+    return response
+
+@app.route('/')
+def home():
+    # Serve index.html from the templates folder
+    return render_template('index.html')
+
+@app.route('/process_voice', methods=['POST'])
+def process_voice():
     try:
-        # Call the AI client
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # Ensure this model name is correct
-            messages=[{"role": "user", "content": content}],
-        )
-        bot_response = response.choices[0].message.content if response.choices else "Sorry, I couldn't process your request."
-        
-        # Check if the bot response is the specific output
+        data = request.get_json()
+        text = data.get('text', '')
+
+        if not text:
+            raise ValueError("No text provided")
+
+        # Get the user's IP address
+        user_ip = request.remote_addr
+        print(f"User IP: {user_ip}")
+
+        # Process the text and get response
+        response = process_message(text)
+
+        # Check if the response is the specific output
         if "BLACKBOX" in response:
             return jsonify({
                 'response': "Please re-enter your message after reloading the site ↻.",
                 'status': 'error',
                 'user_ip': user_ip
             })
+
+        return jsonify({
+            'response': response,
+            'status': 'success',
+            'user_ip': user_ip
+        })
+
+    except ValueError as ve:
+        return jsonify({
+            'response': str(ve),
+            'status': 'error'
+        }), 400
     except Exception as e:
-        logging.error("Error during chat completion: %s", str(e))
-        bot_response = "There was a problem while processing your input. Please enter your message again or reload the site and try again later."
-
-    return jsonify({"response": bot_response})
-
-def open_browser():
-    webbrowser.open("http://127.0.0.1:8080")
+        print(f"Error: {str(e)}")  # Log the error for debugging
+        return jsonify({
+            'response': "There was a problem while processing your input. Try again later.",
+            'status': 'error'
+        }), 500
 
 if __name__ == '__main__':
-    threading.Timer(1, open_browser).start()  # Open the browser after a short delay
-    app.run(host='0.0.0.0', port=8080, debug=False)  # Enable debug mode
+    # Run the Flask app on all available network interfaces
+    app.run(host='0.0.0.0', port=5000, debug=False)

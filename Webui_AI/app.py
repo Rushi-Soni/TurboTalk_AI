@@ -51,7 +51,7 @@ def chat():
 
         # Call the AI client
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # Ensure this model name is correct
+            model="gpt-4o",  # Ensure this model name is correct
             messages=[{"role": "user", "content": content}],
         )
         

@@ -334,97 +334,105 @@
 
     <script>
         $(document).ready(function () {
-            const chatBox = $('#chatBox');
-            const messageInput = $('#messageInput');
-            const behaviorSelect = $('#behaviorSelect');
-            const sendButton = $('#sendButton');
-            const typingIndicator = $('#typingIndicator');
+    const chatBox = $('#chatBox');
+    const messageInput = $('#messageInput');
+    const behaviorSelect = $('#behaviorSelect');
+    const sendButton = $('#sendButton');
+    const typingIndicator = $('#typingIndicator');
 
-            setTimeout(() => {
-                addMessage("👋 Hello! I'm TurboTalk, your AI assistant. How can I help you today?", false);
-            }, 1000);
+    setTimeout(() => {
+        addMessage("👋 Hello! I'm TurboTalk, your AI assistant. How can I help you today?", false);
+    }, 1000);
 
-            function addMessage(message, isUser) {
-                const messageDiv = $('<div>')
-                    .addClass('message')
-                    .addClass(isUser ? 'user-message' : 'bot-message')
-                    .css('opacity', '0');
+    function addMessage(message, isUser) {
+        const messageDiv = $('<div>')
+            .addClass('message')
+            .addClass(isUser ? 'user-message' : 'bot-message')
+            .css('opacity', '0');
 
-                if (isUser) {
-                    messageDiv.text(message);
+        if (isUser) {
+            messageDiv.text(message);
+        } else {
+            messageDiv.html(message);
+        }
+
+        typingIndicator.before(messageDiv);
+        messageDiv.animate({ opacity: 1 }, 500);
+        chatBox.animate({ scrollTop: chatBox[0].scrollHeight }, 500);
+    }
+
+    function sendMessage() {
+        const message = messageInput.val().trim();
+        const behavior = behaviorSelect.val();
+
+        if (message === '') return;
+
+        addMessage(message, true);
+        messageInput.val('');
+        sendButton.prop('disabled', true);
+        typingIndicator.show();
+
+        $.ajax({
+            url: '/chat',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                message: message,
+                behaviour: behavior
+            }),
+            success: function (response) {
+                typingIndicator.hide();
+                if (response.response === "There was an issue connecting to the server. Please reload the page and enter your message again.") {
+                    addMessage(response.response, false);
                 } else {
-                    messageDiv.html(message);
+                    setTimeout(() => {
+                        addMessage(response.response, false);
+                    }, 500);
                 }
-
-                typingIndicator.before(messageDiv);
-                messageDiv.animate({ opacity: 1 }, 500);
-                chatBox.animate({ scrollTop: chatBox[0].scrollHeight }, 500);
-            }
-
-            function sendMessage() {
-                const message = messageInput.val().trim();
-                const behavior = behaviorSelect.val();
-
-                if (message === '') return;
-
-                addMessage(message, true);
-                messageInput.val('');
-                sendButton.prop('disabled', true);
-                typingIndicator.show();
-
-                $.ajax({
-                    url: '/chat',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        message: message,
-                        behaviour: behavior
-                    }),
-                    success: function (response) {
-                        typingIndicator.hide();
-                        setTimeout(() => {
-                            addMessage(response.response, false);
-                        }, 500);
-                    },
-                    error: function () {
-                        typingIndicator.hide();
-                        addMessage("⚠️ Let's try that again!", false);
-                    },
-                    complete: function () {
-                        sendButton.prop('disabled', false);
-                    }
-                });
-            }
-
-            behaviorSelect.on('mouseover', function () {
-                $(this).css('transform', 'scale(1.02)');
-            }).on('mouseout', function () {
-                $(this).css('transform', 'scale(1)');
-            });
-
-            sendButton.click(sendMessage);
-
-            messageInput.keypress(function (e) {
-                if (e.which === 13) {
-                    sendMessage();
+            },
+            error: function (xhr, status, error) {
+                typingIndicator.hide();
+                if (xhr.status === 0) {
+                    addMessage("⚠️ Unable to connect to the server. Please check your internet connection.", false);
+                } else {
+                    addMessage("⚠️ An unexpected error occurred. Please try again later.", false);
                 }
-            });
-
-            sendButton.on('click', function (e) {
-                const button = $(this);
-                const ripple = $('<span></span>').css({
-                    position: 'absolute',
-                    background: 'rgba(255,255,255,0.7)',
-                    borderRadius: '50%',
-                    transform: 'scale(0)',
-                    animation: 'ripple 0.6s linear',
-                    left: e.clientX - button.offset().left,
-                    top: e.clientY - button.offset().top
-                });
-                button.append(ripple);
-                setTimeout(() => ripple.remove(), 600);
-            });
+            },
+            complete: function () {
+                sendButton.prop('disabled', false);
+            }
         });
+    }
+
+    behaviorSelect.on('mouseover', function () {
+        $(this).css('transform', 'scale(1.02)');
+    }).on('mouseout', function () {
+        $(this).css('transform', 'scale(1)');
+    });
+
+    sendButton.click(sendMessage);
+
+    messageInput.keypress(function (e) {
+        if (e.which === 13) {
+            sendMessage();
+        }
+    });
+
+    sendButton.on('click', function (e) {
+        const button = $(this);
+        const ripple = $('<span></span>').css({
+            position: 'absolute',
+            background: 'rgba(255,255,255,0.7)',
+            borderRadius: '50%',
+            transform: 'scale(0)',
+            animation: 'ripple 0.6s linear',
+            left: e.clientX - button.offset().left,
+            top: e.clientY - button.offset().top
+        });
+        button.append(ripple);
+        setTimeout(() => ripple.remove(), 600);
+    });
+});
     </script>
 </body>
 </html>

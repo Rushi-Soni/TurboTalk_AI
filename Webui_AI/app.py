@@ -48,7 +48,7 @@ def chat():
     try:
         # Call the AI client
         response = client.chat.completions.create(
-            model="gpt-4o",  # Ensure this model name is correct
+            model="gpt-3.5-turbo",  # Ensure this model name is correct
             messages=[{"role": "user", "content": content}],
         )
         bot_response = response.choices[0].message.content if response.choices else "Sorry, I couldn't process your request."

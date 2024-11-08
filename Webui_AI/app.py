@@ -69,8 +69,7 @@ def chat():
         # Check if the bot response is blank or empty, and if so, return a custom message
         if not bot_response.strip():
             bot_response = (
-                "TurboTalk is currently in a learning stage and doesn't have higher-order thinking yet. "
-                "Please check back later as it continues to improve."
+                "Sorry for the inconvenience 😔 because of some technical issue. We weren't able to response you to this message, please try again later, after reloading the site."
             )
 
         # Check if the bot response contains the specific text to prompt for message re-entry

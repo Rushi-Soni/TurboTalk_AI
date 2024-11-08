@@ -76,6 +76,9 @@ def chat():
         # Check if the bot response contains the specific text to prompt for message re-entry
         if "Thank you for using BLACKBOX.AI" in bot_response:
             return jsonify({"response": "Please re-enter your message."})
+            
+        if "Model not found or too long input. Or any other error (xD)" in bot_response:
+            return jsonify({"response": " Sorry for the inconvenience because of some technical issue. We weren't able to response you to this message, please try again later, after reloading the site."})
 
     except requests.exceptions.RequestException as e:
         # Handle specific network/connection issues

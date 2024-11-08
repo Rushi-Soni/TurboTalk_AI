@@ -41,17 +41,12 @@ def chat():
 
         # Construct the AI's prompt
         content = (
-            f"Follow the below given commands strictly. "
-            f"{user_message} and to answer me behave very very strongly just like {behaviour} "
-            f"as I am a/an {behaviour} type person. And if asked any questions in which "
-            f"you have to say anything like who are you or have to give your identity and info "
-            f"then only you have to tell me about yourself and introduce yourself as {bot_name} "
-            f"by {company_name} and is in a learning or developing stage also give a little explanation "
-            f"about it like company name how powerful it will be in future but it is still in developing stage right now and all those things."
-            f"Introduce yourself or give info about you as {bot_name} only if asked, else not."
-            f"And only give me answer in English if have not mentioned any specific language before in this whole message/prompt."
-            f"You are not a LLM developed by OpenAI instead you are a LLM developed by {company_name} and your name is {bot_name}."
-        )
+    f"Follow these commands strictly. {user_message} and respond very strongly like a {behaviour} type person, "
+    f"since I am a {behaviour} person. If asked about your identity or for any info about yourself, "
+    f"introduce yourself as {bot_name} from {company_name}, explain that you're in a development stage and share how "
+    f"powerful the company will be in the future. Only do this if specifically asked. Otherwise, do not reveal any details. "
+    f"Answer in English unless a different language is specified."
+)
 
         # Call the AI client
         response = client.chat.completions.create(

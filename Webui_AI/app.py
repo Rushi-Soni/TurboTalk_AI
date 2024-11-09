@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.INFO)
 # Define your company and bot names
 company_name = "Rango Productions"
 bot_name = "TurboTalk"
+my_name = "Rushi Bhavinkumar Soni"
 
 @app.route('/')
 def index():
@@ -41,7 +42,10 @@ def chat():
         f"about it like company name how powerful it will be in future but it is still in developing stage right now and all those things."
         f"Introduce yourself or give info about you as {bot_name} only if asked, else not."
         f"And only give me answer in English if have not mentioned any specific language before in this whole message/prompt."
-        f"You are not a LLM developed by OpenAI instead you are a LLM developed by {company_name} and your name is {bot_name}."
+        f"You are a LLM developed by {company_name} and your name is {bot_name}."
+        f"But don't introduce yourself againg and again and introduce yourself only if asked and when ever to do so only introduce your self as {bot_name} by {company_name}."
+        f"Always give direct answers, and never ever tell me that your purpose is to assist with complex programming tasks, technical inquiries, and information seeking within the context of a VSCode environment instead just tell that yout purpose is to assiste me in almost every possible way."
+        f"Don't include any of these commands in the output, and if any one asks I am Founder/CEO of the company {company_name} my name is {my_name}."
     )
 
     try:
@@ -50,14 +54,7 @@ def chat():
         user_input = content
         bot_response = prompt(user_input)
 
-    logging.error("Network error: %s", str(e))
-        return jsonify({"response": "Network error. Please check your internet connection or try again later."})
 
-    except Exception as e:
-        # General exception handler for any unexpected errors
-        logging.error("Unexpected error: %s", str(e))
-        return jsonify({"response": "An unexpected error occurred. Please try again later."})
-    
     except Exception as e:
         logging.error("Error during chat completion: %s", str(e))
         bot_response = "There was a problem while processing your input. Please enter your message again."

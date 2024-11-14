@@ -18,12 +18,14 @@ model = "GPT 4o"
 bot_role = "user"  # This is the bot's role in the interaction
 chat_history_bot_role = "assistant"  # This is the role of the bot in the conversation history
 
+# Store conversation history by IP
+conversation_histories = {}
+
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     return render_template('ui.html')
-
 
 def prompt_with_context(inputs, conversation_history):
     url = "https://https.extension.phind.com/agent/"  # API endpoint
@@ -84,9 +86,12 @@ def chat():
         logging.warning("Invalid input: %s", request.json)
         return jsonify({"response": "Invalid input."}), 400
 
-    # Initialize or retrieve conversation history from session or memory
-    if not hasattr(chat, 'conversation_history'):
-        chat.conversation_history = []  # Initialize if not present
+    # Get client IP address
+    client_ip = request.remote_addr  # Extract IP address from the request
+
+    # Initialize or retrieve conversation history for the client IP
+    if client_ip not in conversation_histories:
+        conversation_histories[client_ip] = []  # Initialize if not present
     
     # Construct the AI's prompt based on the user input and behaviour
     content = (
@@ -106,18 +111,18 @@ def chat():
     )
 
     # Add user input to the conversation history
-    chat.conversation_history.append({"content": content, "role": bot_role})
+    conversation_histories[client_ip].append({"content": content, "role": bot_role})
 
     try:
         # Use the prompt function to get the response with context
-        bot_response = prompt_with_context(user_message, chat.conversation_history)
+        bot_response = prompt_with_context(user_message, conversation_histories[client_ip])
 
     except Exception as e:
         logging.error("Error during chat completion: %s", str(e))
         bot_response = "There was a problem while processing your input. Please try again later."
 
     # Add assistant response to the conversation history
-    chat.conversation_history.append({"content": bot_response, "role": chat_history_bot_role})
+    conversation_histories[client_ip].append({"content": bot_response, "role": chat_history_bot_role})
 
     return jsonify({"response": bot_response})
 

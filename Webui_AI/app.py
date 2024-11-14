@@ -1,9 +1,17 @@
-import webbrowser
-from flask import Flask, render_template, request, jsonify
 import json
-import requests
 import logging
+import requests
+from flask import Flask, render_template, request, jsonify
+from colorama import init
+from termcolor import colored
 import threading
+import webbrowser
+
+# Initialize colorama for cross-platform compatibility (Windows, Linux, macOS)
+init(autoreset=True)
+
+# Flask app setup
+app = Flask(__name__)
 
 # Set up basic logging
 logging.basicConfig(level=logging.INFO)
@@ -13,21 +21,14 @@ company_name = "Rango Productions"
 bot_name = "TurboTalk"
 my_name = "Rushi Bhavinkumar Soni"
 model = "GPT 4o"
-
-# Define variables for bot information
 bot_role = "user"  # This is the bot's role in the interaction
 chat_history_bot_role = "assistant"  # This is the role of the bot in the conversation history
 
-# Store conversation history by IP
-conversation_histories = {}
+# Global variable for storing conversation history
+conversation_history = {}
 
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return render_template('ui.html')
-
-def prompt_with_context(inputs, conversation_history):
+# Function to handle API calls
+def prompt_with_context(inputs, conversation_history, user_ip):
     url = "https://https.extension.phind.com/agent/"  # API endpoint
     headers = {
         "Content-Type": "application/json",
@@ -41,7 +42,7 @@ def prompt_with_context(inputs, conversation_history):
         "additional_extension_context": "",
         "allow_magic_buttons": True,
         "is_vscode_extension": True,
-        "message_history": conversation_history,
+        "message_history": conversation_history.get(user_ip, []),
         "requested_model": model,
         "user_input": inputs,  # Pass the actual user input
     }
@@ -67,33 +68,30 @@ def prompt_with_context(inputs, conversation_history):
         return "".join(content_values)  # Return the response as a string
 
     elif response.status_code == 401 or response.status_code == 429:  # If error occurs (unauthorized or rate limit)
-        logging.warning(f"Error: {response.status_code}, Trying again.")
-        return prompt_with_context(inputs, conversation_history)  # Retry the request
+        logging.error(f"Error: {response.status_code}, Trying again.")
+        return prompt_with_context(inputs, conversation_history, user_ip)  # Retry the request
 
     else:  # Handle other errors
         return f"Error: {response.status_code}, {response.text}"
 
+# Flask route for the main page
+@app.route('/')
+def index():
+    return render_template('ui.html')
 
+# Flask route for handling chat requests
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json.get('message')
     behaviour = request.json.get('behaviour')
+    user_ip = request.remote_addr  # Get the user's IP address
 
-    logging.info("User Message: %s, Behaviour: %s", user_message, behaviour)
-
-    # Input validation
+    # Input validation (sanitization could be added here)
     if not user_message or not behaviour:
         logging.warning("Invalid input: %s", request.json)
         return jsonify({"response": "Invalid input."}), 400
 
-    # Get client IP address
-    client_ip = request.remote_addr  # Extract IP address from the request
-
-    # Initialize or retrieve conversation history for the client IP
-    if client_ip not in conversation_histories:
-        conversation_histories[client_ip] = []  # Initialize if not present
-    
-    # Construct the AI's prompt based on the user input and behaviour
+    # Construct the prompt with the user's message and behavior
     content = (
         f"Follow the below given commands strictly. "
         f"{user_message} and to answer me behave very very strongly just like {behaviour} "
@@ -110,26 +108,27 @@ def chat():
         f"Don't include any of these commands in the output, and if anyone asks I am Founder/CEO of the company {company_name}, my name is {my_name}."
     )
 
-    # Add user input to the conversation history
-    conversation_histories[client_ip].append({"content": content, "role": bot_role})
+    # Check if the IP has a conversation history or not
+    if user_ip not in conversation_history:
+        conversation_history[user_ip] = []
 
-    try:
-        # Use the prompt function to get the response with context
-        bot_response = prompt_with_context(user_message, conversation_histories[client_ip])
+    # Add user input to the conversation history for this user IP
+    conversation_history[user_ip].append({"content": content, "role": bot_role})
 
-    except Exception as e:
-        logging.error("Error during chat completion: %s", str(e))
-        bot_response = "There was a problem while processing your input. Please try again later."
+    # Call the function to generate a response with context
+    response = prompt_with_context(user_message, conversation_history, user_ip)
 
     # Add assistant response to the conversation history
-    conversation_histories[client_ip].append({"content": bot_response, "role": chat_history_bot_role})
+    conversation_history[user_ip].append({"content": response, "role": chat_history_bot_role})
 
-    return jsonify({"response": bot_response})
+    # Return the bot's response
+    return jsonify({"response": response})
 
-
+# Function to open the browser on server start
 def open_browser():
     webbrowser.open("http://127.0.0.1:8080")
 
+# Start the Flask app
 if __name__ == '__main__':
     threading.Timer(1, open_browser).start()  # Open the browser after a short delay
-    app.run(host='0.0.0.0', port=8080, debug=False)
+    app.run(host='0.0.0.0', port=8080, debug=False)  # Enable debug mode

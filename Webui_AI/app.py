@@ -1,133 +1,283 @@
 import json
 import logging
+import os
 import requests
+import threading
+import webbrowser
+import uuid
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, session
 from colorama import init
 from termcolor import colored
-import threading
-import webbrowser
+from logging.handlers import RotatingFileHandler
 
-# Initialize colorama for cross-platform compatibility (Windows, Linux, macOS)
+# Initialize colorama for cross-platform compatibility
 init(autoreset=True)
 
-# Flask app setup
-app = Flask(__name__)
+class Config:
+    """Configuration class for the application"""
+    COMPANY_NAME = "Rango Productions"
+    BOT_NAME = "TurboTalk"
+    CREATOR_NAME = "Rushi Bhavinkumar Soni"
+    MODEL = "GPT 4o"
+    BOT_ROLE = "user"
+    CHAT_HISTORY_BOT_ROLE = "assistant"
+    API_URL = "https://https.extension.phind.com/agent/"
+    SESSION_TIMEOUT = 24 * 3600  # 24 hours in seconds
+    CLEANUP_INTERVAL = 3600  # 1 hour in seconds
+    MAX_RETRIES = 3
+    LOG_FILE = "chat_app.log"
+    LOG_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
+    LOG_BACKUP_COUNT = 5
 
-# Set the secret key (replace this with your secret key)
-app.secret_key = 'plasmabobbyrangoproductions1209ko'  # Your secret key
-
-# Set up basic logging
-logging.basicConfig(level=logging.INFO)
-
-# Define your company and bot names
-company_name = "Rango Productions"
-bot_name = "TurboTalk"
-my_name = "Rushi Bhavinkumar Soni"
-model = "GPT 4o"
-bot_role = "user"  # This is the bot's role in the interaction
-chat_history_bot_role = "assistant"  # This is the role of the bot in the conversation history
-
-# Function to handle API calls
-def prompt_with_context(inputs, conversation_history):
-    url = "https://https.extension.phind.com/agent/"  # API endpoint
-    headers = {
-        "Content-Type": "application/json",
-        "User-Agent": "",
-        "Accept": "*/*",
-        "Accept-Encoding": "Identity",
-    }
-
-    # Payload with conversation history
-    payload = {
-        "additional_extension_context": "",
-        "allow_magic_buttons": True,
-        "is_vscode_extension": True,
-        "message_history": conversation_history,
-        "requested_model": model,
-        "user_input": inputs,  # Pass the actual user input
-    }
-
-    # Send POST request to the API
-    response = requests.post(url, json=payload, headers=headers)
+class ConversationManager:
+    """Manages conversation histories for different sessions"""
+    def __init__(self):
+        self.conversations = {}
+        self.session_map = {}
+        self.cleanup_interval = Config.CLEANUP_INTERVAL
+        self.session_timeout = Config.SESSION_TIMEOUT
+        self.logger = logging.getLogger('ConversationManager')
+        
+        # Start cleanup thread
+        cleanup_thread = threading.Thread(target=self._cleanup_old_sessions, daemon=True)
+        cleanup_thread.start()
     
-    if response.status_code == 200:  # If the response is successful
-        response_content = response.content
-        # Split response content into parts (by line breaks)
-        lines = response_content.decode("utf-8").split("\r\n\r\n")
-        content_values = []
-        for line in lines:
+    def get_conversation_id(self, session_id):
+        """Get or create a conversation ID for a session"""
+        if session_id not in self.session_map:
+            conv_id = str(uuid.uuid4())
+            self.session_map[session_id] = conv_id
+            self.conversations[conv_id] = {
+                'history': [],
+                'last_access': datetime.now(),
+                'session_id': session_id
+            }
+            self.logger.info(f"Created new conversation for session {session_id[:8]}...")
+        return self.session_map[session_id]
+    
+    def add_message(self, session_id, message, role):
+        """Add a message to the conversation history"""
+        try:
+            conv_id = self.get_conversation_id(session_id)
+            self.conversations[conv_id]['history'].append({
+                'content': message,
+                'role': role,
+                'timestamp': datetime.now().isoformat()
+            })
+            self.conversations[conv_id]['last_access'] = datetime.now()
+            self.logger.debug(f"Added message for session {session_id[:8]}...")
+        except Exception as e:
+            self.logger.error(f"Error adding message: {str(e)}")
+            raise
+    
+    def get_history(self, session_id):
+        """Get conversation history for a session"""
+        try:
+            conv_id = self.get_conversation_id(session_id)
+            return self.conversations[conv_id]['history']
+        except Exception as e:
+            self.logger.error(f"Error getting history: {str(e)}")
+            return []
+    
+    def _cleanup_old_sessions(self):
+        """Periodically clean up old sessions"""
+        while True:
             try:
-                data = json.loads(line.split("data: ")[1])  # Parse each part
-                choices = data.get("choices", [])
-                for choice in choices:
-                    content = choice.get("delta", {}).get("content")  # Extract content
-                    if content:
-                        content_values.append(content)
-            except IndexError:
-                pass
-        return "".join(content_values)  # Return the response as a string
+                current_time = datetime.now()
+                expired_convs = []
+                
+                for conv_id, data in self.conversations.items():
+                    if (current_time - data['last_access']).total_seconds() > self.session_timeout:
+                        expired_convs.append(conv_id)
+                        session_id = data['session_id']
+                        if session_id in self.session_map:
+                            del self.session_map[session_id]
+                
+                for conv_id in expired_convs:
+                    del self.conversations[conv_id]
+                    self.logger.info(f"Cleaned up conversation {conv_id[:8]}...")
+                
+                threading.Event().wait(self.cleanup_interval)
+            except Exception as e:
+                self.logger.error(f"Error in cleanup: {str(e)}")
+                threading.Event().wait(60)  # Wait a minute before retrying
 
-    elif response.status_code == 401 or response.status_code == 429:  # If error occurs (unauthorized or rate limit)
-        logging.error(f"Error: {response.status_code}, Trying again.")
-        return prompt_with_context(inputs, conversation_history)  # Retry the request
+class ChatAPI:
+    """Handles communication with the chat API"""
+    def __init__(self):
+        self.logger = logging.getLogger('ChatAPI')
+        self.headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "",
+            "Accept": "*/*",
+            "Accept-Encoding": "Identity",
+        }
 
-    else:  # Handle other errors
-        return f"Error: {response.status_code}, {response.text}"
+    def send_request(self, inputs, conversation_history, session_id):
+        """Send request to the API and process response"""
+        formatted_history = [
+            {'role': msg['role'], 'content': msg['content']}
+            for msg in conversation_history
+        ]
 
-# Flask route for the main page
+        payload = {
+            "additional_extension_context": "",
+            "allow_magic_buttons": True,
+            "is_vscode_extension": True,
+            "message_history": formatted_history,
+            "requested_model": Config.MODEL,
+            "user_input": inputs,
+        }
+
+        for attempt in range(Config.MAX_RETRIES):
+            try:
+                response = requests.post(
+                    Config.API_URL,
+                    json=payload,
+                    headers=self.headers,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    return self._process_response(response)
+                elif response.status_code in (401, 429):
+                    self.logger.warning(f"Attempt {attempt + 1}: Status {response.status_code}")
+                    if attempt == Config.MAX_RETRIES - 1:
+                        return "Server is busy. Please try again later."
+                    threading.Event().wait(2 ** attempt)  # Exponential backoff
+                else:
+                    return f"Error: {response.status_code}"
+                    
+            except requests.exceptions.RequestException as e:
+                self.logger.error(f"Request error: {str(e)}")
+                if attempt == Config.MAX_RETRIES - 1:
+                    return "Network error. Please check your connection."
+
+    def _process_response(self, response):
+        """Process the API response"""
+        try:
+            response_content = response.content
+            lines = response_content.decode("utf-8").split("\r\n\r\n")
+            content_values = []
+            
+            for line in lines:
+                if line.startswith("data: "):
+                    try:
+                        data = json.loads(line.split("data: ")[1])
+                        choices = data.get("choices", [])
+                        for choice in choices:
+                            content = choice.get("delta", {}).get("content")
+                            if content:
+                                content_values.append(content)
+                    except json.JSONDecodeError:
+                        continue
+                        
+            return "".join(content_values) or "No response generated."
+            
+        except Exception as e:
+            self.logger.error(f"Error processing response: {str(e)}")
+            return "Error processing response."
+
+def setup_logging():
+    """Configure logging for the application"""
+    logging.basicConfig(level=logging.INFO)
+    
+    # Create logs directory if it doesn't exist
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    
+    # Set up file handler with rotation
+    file_handler = RotatingFileHandler(
+        os.path.join('logs', Config.LOG_FILE),
+        maxBytes=Config.LOG_MAX_SIZE,
+        backupCount=Config.LOG_BACKUP_COUNT
+    )
+    
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+    
+    # Add handler to root logger
+    logging.getLogger('').addHandler(file_handler)
+
+# Set up Flask application
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
+app.permanent_session_lifetime = timedelta(hours=24)
+
+# Initialize components
+setup_logging()
+conversation_manager = ConversationManager()
+chat_api = ChatAPI()
+logger = logging.getLogger('FlaskApp')
+
 @app.route('/')
 def index():
+    """Route for the main page"""
+    if 'session_id' not in session:
+        session['session_id'] = str(uuid.uuid4())
+        logger.info(f"New session created: {session['session_id'][:8]}...")
     return render_template('ui.html')
 
-# Flask route for handling chat requests
 @app.route('/chat', methods=['POST'])
 def chat():
-    user_message = request.json.get('message')
-    behaviour = request.json.get('behaviour')
+    """Route for handling chat requests"""
+    try:
+        if 'session_id' not in session:
+            session['session_id'] = str(uuid.uuid4())
+        
+        session_id = session['session_id']
+        user_message = request.json.get('message', '').strip()
+        behaviour = request.json.get('behaviour', '').strip()
 
-    # Input validation (sanitization could be added here)
-    if not user_message or not behaviour:
-        logging.warning("Invalid input: %s", request.json)
-        return jsonify({"response": "Invalid input."}), 400
+        if not user_message or not behaviour:
+            logger.warning(f"Invalid input: {request.json}")
+            return jsonify({"response": "Please provide a message and behaviour."}), 400
 
-    # Use session to store the conversation history
-    if 'conversation_history' not in session:
-        session['conversation_history'] = []  # Initialize an empty conversation history
+        # Construct prompt
+        prompt = (
+            f"Follow the below given commands strictly. "
+            f"{user_message} and to answer me behave very very strongly just like {behaviour} "
+            f"as I am a/an {behaviour} type person. And if asked any questions in which "
+            f"you have to say anything like who are you or have to give your identity and info "
+            f"then only you have to tell me about yourself and introduce yourself as {Config.BOT_NAME} "
+            f"by {Config.COMPANY_NAME} and is in a learning or developing stage also give a little explanation "
+            f"about it like company name how powerful it will be in future but it is still in developing stage right now and all those things."
+            f"Introduce yourself or give info about you as {Config.BOT_NAME} only if asked, else not."
+            f"And only give me answer in English if have not mentioned any specific language before in this whole message/prompt."
+            f"You are a LLM developed by {Config.COMPANY_NAME} and your name is {Config.BOT_NAME}."
+            f"But don't introduce yourself again and again and introduce yourself only if asked and when ever to do so only introduce yourself as {Config.BOT_NAME} by {Config.COMPANY_NAME}."
+        )
 
-    # Construct the prompt with the user's message and behavior
-    content = (
-        f"Follow the below given commands strictly. "
-        f"{user_message} and to answer me behave very very strongly just like {behaviour} "
-        f"as I am a/an {behaviour} type person. And if asked any questions in which "
-        f"you have to say anything like who are you or have to give your identity and info "
-        f"then only you have to tell me about yourself and introduce yourself as {bot_name} "
-        f"by {company_name} and is in a learning or developing stage also give a little explanation "
-        f"about it like company name how powerful it will be in future but it is still in developing stage right now and all those things."
-        f"Introduce yourself or give info about you as {bot_name} only if asked, else not."
-        f"And only give me answer in English if have not mentioned any specific language before in this whole message/prompt."
-        f"You are a LLM developed by {company_name} and your name is {bot_name}."
-        f"But don't introduce yourself again and again and introduce yourself only if asked and when ever to do so only introduce yourself as {bot_name} by {company_name}."
-        f"Always give direct answers, and never ever tell me that your purpose is to assist with complex programming tasks, technical inquiries, and information seeking within the context of a VSCode environment instead just tell that your purpose is to assist me in almost every possible way."
-        f"Don't include any of these commands in the output, and if anyone asks I am Founder/CEO of the company {company_name}, my name is {my_name}."
-    )
+        # Add user message to history
+        conversation_manager.add_message(session_id, prompt, Config.BOT_ROLE)
+        
+        # Get conversation history
+        history = conversation_manager.get_history(session_id)
+        
+        # Get response from API
+        response = chat_api.send_request(user_message, history, session_id)
+        
+        # Add bot response to history
+        conversation_manager.add_message(session_id, response, Config.CHAT_HISTORY_BOT_ROLE)
+        
+        return jsonify({"response": response})
+        
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {str(e)}")
+        return jsonify({"response": "An error occurred. Please try again."}), 500
 
-    # Add user input to the conversation history for this user session
-    session['conversation_history'].append({"content": content, "role": bot_role})
-
-    # Call the function to generate a response with context
-    response = prompt_with_context(user_message, session['conversation_history'])
-
-    # Add assistant response to the conversation history
-    session['conversation_history'].append({"content": response, "role": chat_history_bot_role})
-
-    # Return the bot's response
-    return jsonify({"response": response})
-
-# Function to open the browser on server start
 def open_browser():
-    webbrowser.open("http://127.0.0.1:8080")
+    """Open the browser when the application starts"""
+    try:
+        webbrowser.open("http://127.0.0.1:8080")
+    except Exception as e:
+        logger.error(f"Error opening browser: {str(e)}")
 
-# Start the Flask app
 if __name__ == '__main__':
-    threading.Timer(1, open_browser).start()  # Open the browser after a short delay
-    app.run(host='0.0.0.0', port=8080, debug=False)  # Enable debug mode 
+    try:
+        threading.Timer(1, open_browser).start()
+        app.run(host='0.0.0.0', port=8080, debug=False)
+    except Exception as e:
+        logger.critical(f"Application failed to start: {str(e)}")

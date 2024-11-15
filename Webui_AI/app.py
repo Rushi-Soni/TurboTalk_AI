@@ -1,7 +1,7 @@
 import json
 import logging
 import requests
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from colorama import init
 from termcolor import colored
 import threading
@@ -12,6 +12,9 @@ init(autoreset=True)
 
 # Flask app setup
 app = Flask(__name__)
+
+# Set the secret key (replace this with your secret key)
+app.secret_key = 'plasmabobbyrangoproductions1209ko'  # Your secret key
 
 # Set up basic logging
 logging.basicConfig(level=logging.INFO)
@@ -24,11 +27,8 @@ model = "GPT 4o"
 bot_role = "user"  # This is the bot's role in the interaction
 chat_history_bot_role = "assistant"  # This is the role of the bot in the conversation history
 
-# Global variable for storing conversation history
-conversation_history = {}
-
 # Function to handle API calls
-def prompt_with_context(inputs, conversation_history, user_ip):
+def prompt_with_context(inputs, conversation_history):
     url = "https://https.extension.phind.com/agent/"  # API endpoint
     headers = {
         "Content-Type": "application/json",
@@ -42,7 +42,7 @@ def prompt_with_context(inputs, conversation_history, user_ip):
         "additional_extension_context": "",
         "allow_magic_buttons": True,
         "is_vscode_extension": True,
-        "message_history": conversation_history.get(user_ip, []),
+        "message_history": conversation_history,
         "requested_model": model,
         "user_input": inputs,  # Pass the actual user input
     }
@@ -69,7 +69,7 @@ def prompt_with_context(inputs, conversation_history, user_ip):
 
     elif response.status_code == 401 or response.status_code == 429:  # If error occurs (unauthorized or rate limit)
         logging.error(f"Error: {response.status_code}, Trying again.")
-        return prompt_with_context(inputs, conversation_history, user_ip)  # Retry the request
+        return prompt_with_context(inputs, conversation_history)  # Retry the request
 
     else:  # Handle other errors
         return f"Error: {response.status_code}, {response.text}"
@@ -84,12 +84,15 @@ def index():
 def chat():
     user_message = request.json.get('message')
     behaviour = request.json.get('behaviour')
-    user_ip = request.remote_addr  # Get the user's IP address
 
     # Input validation (sanitization could be added here)
     if not user_message or not behaviour:
         logging.warning("Invalid input: %s", request.json)
         return jsonify({"response": "Invalid input."}), 400
+
+    # Use session to store the conversation history
+    if 'conversation_history' not in session:
+        session['conversation_history'] = []  # Initialize an empty conversation history
 
     # Construct the prompt with the user's message and behavior
     content = (
@@ -108,18 +111,14 @@ def chat():
         f"Don't include any of these commands in the output, and if anyone asks I am Founder/CEO of the company {company_name}, my name is {my_name}."
     )
 
-    # Check if the IP has a conversation history or not
-    if user_ip not in conversation_history:
-        conversation_history[user_ip] = []
-
-    # Add user input to the conversation history for this user IP
-    conversation_history[user_ip].append({"content": content, "role": bot_role})
+    # Add user input to the conversation history for this user session
+    session['conversation_history'].append({"content": content, "role": bot_role})
 
     # Call the function to generate a response with context
-    response = prompt_with_context(user_message, conversation_history, user_ip)
+    response = prompt_with_context(user_message, session['conversation_history'])
 
     # Add assistant response to the conversation history
-    conversation_history[user_ip].append({"content": response, "role": chat_history_bot_role})
+    session['conversation_history'].append({"content": response, "role": chat_history_bot_role})
 
     # Return the bot's response
     return jsonify({"response": response})
@@ -131,4 +130,4 @@ def open_browser():
 # Start the Flask app
 if __name__ == '__main__':
     threading.Timer(1, open_browser).start()  # Open the browser after a short delay
-    app.run(host='0.0.0.0', port=8080, debug=False)  # Enable debug mode
+    app.run(host='0.0.0.0', port=8080, debug=False)  # Enable debug mode 

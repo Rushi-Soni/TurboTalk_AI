@@ -27,7 +27,7 @@ class Config:
     CLEANUP_INTERVAL = 3600  # 1 hour in seconds
     MAX_RETRIES = 3
     LOG_FILE = "chat_app.log"
-    LOG_MAX_SIZE = 10 * 1024 * 1024  # 10 MB
+    LOG_MAX_SIZE = 1 * 1024 * 1024  # 1 MB
     LOG_BACKUP_COUNT = 5
 
 class ConversationManager:

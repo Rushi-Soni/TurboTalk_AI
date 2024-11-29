@@ -465,6 +465,62 @@
         setTimeout(() => ripple.remove(), 600);
     });
 });
+      // Function to escape HTML to prevent rendering
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+
+// Modify the addMessage function
+function addMessage(message, isUser) {
+    const messageDiv = $('<div>')
+        .addClass('message')
+        .addClass(isUser ? 'user-message' : 'bot-message')
+        .css('opacity', '0');
+
+    if (isUser) {
+        messageDiv.text(message);
+    } else {
+        // Always escape HTML content for bot messages
+        const escapedMessage = escapeHtml(message);
+        
+        // If the message looks like code (starts with ```), preserve formatting
+        if (message.startsWith('```') && message.endsWith('```')) {
+            const codeContent = message.replace(/```/g, '').trim();
+            messageDiv.html(`<pre class="code-output">${escapeHtml(codeContent)}</pre>`);
+        } else {
+            // Regular message, but still escaped
+            messageDiv.html(escapedMessage);
+        }
+    }
+
+    typingIndicator.before(messageDiv);
+    messageDiv.animate({ opacity: 1 }, 500);
+    chatBox.animate({ scrollTop: chatBox[0].scrollHeight }, 500);
+}
+
+// Additional style for code output
+const codeStyle = `
+<style>
+    .code-output {
+        background-color: rgba(0,0,0,0.3);
+        color: #e0e0e0;
+        font-family: 'Courier New', monospace;
+        padding: 10px;
+        border-radius: 5px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin: 10px 0;
+    }
+</style>
+`;
+
+// Append the code style to the head of the document
+$('head').append(codeStyle);
     </script>
 </body>
 </html>

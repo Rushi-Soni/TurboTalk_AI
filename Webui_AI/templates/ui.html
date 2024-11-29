@@ -295,6 +295,16 @@
             transition: var(--transition);
             position: relative;
         }
+      
+      .code-output {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #e0e0e0;
+        }
     </style>
 </head>
 <body>
@@ -328,7 +338,7 @@
             </div>
         </div>
     </div>
-            <footer>
+    <footer>
         <p>Get Technical Help with the <a href="mailto:rushisoni1209@gmail.com">e-mail us</a></p>
     </footer>
 
@@ -353,7 +363,29 @@
         if (isUser) {
             messageDiv.text(message);
         } else {
-            messageDiv.html(message);
+            // Modify this to handle HTML and code output
+            if (message.startsWith('```') && message.endsWith('```')) {
+                // If message looks like a code block
+                const codeContent = message.replace(/```/g, '').trim();
+                const codeDiv = $('<div>')
+                    .addClass('code-output')
+                    .text(codeContent);
+                messageDiv.append(codeDiv);
+            } else if (message.includes('&lt;') && message.includes('&gt;')) {
+                // If message contains HTML-escaped tags, display as text
+                const escapedContent = message
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&');
+                
+                const codeDiv = $('<div>')
+                    .addClass('code-output')
+                    .text(escapedContent);
+                messageDiv.append(codeDiv);
+            } else {
+                // Normal message rendering
+                messageDiv.html(message);
+            }
         }
 
         typingIndicator.before(messageDiv);

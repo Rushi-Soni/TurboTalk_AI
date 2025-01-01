@@ -11,6 +11,11 @@ from colorama import init
 from termcolor import colored
 from logging.handlers import RotatingFileHandler
 from bs4 import BeautifulSoup
+from diffusers import StableDiffusionPipeline
+import torch
+from io import BytesIO
+import base64
+from PIL import Image
 
 # Initialize colorama for cross-platform compatibility
 init(autoreset=True)
@@ -142,25 +147,7 @@ class ChatAPI:
 
                 if response.status_code == 200:
                     ai_response = self._process_response(response)
-                    
-                    # Check if the AI response indicates it cannot fulfill the request
-                    if "I cannot fulfill this request" in ai_response or "I'm sorry, but I can't fulfill this request." in ai_response:
-                        # Perform web search and summarize the content
-                        search_results = self._search_web(inputs)
-                        return self._summarize_web_content(search_results)
-                    else:
-                        # Only add links if the query appears to be asking for references or resources
-                        if self._should_add_links(inputs):
-                            links = self._search_web(inputs)
-                            if links:
-                                formatted_response = ai_response.rstrip()
-                                if not formatted_response.endswith('.'):
-                                    formatted_response += '.'
-                                formatted_response += "\n\nRelevant resources:\n"
-                                for link in links[:3]:  # Limit to max 3 links
-                                    formatted_response += f"• {link}\n"
-                                return formatted_response
-                        return ai_response
+                    return ai_response
                 elif response.status_code in (401, 429):
                     self.logger.warning(f"Attempt {attempt + 1}: Status {response.status_code}")
                     if attempt == Config.MAX_RETRIES - 1:
@@ -199,57 +186,31 @@ class ChatAPI:
             self.logger.error(f"Error processing response: {str(e)}")
             return "Error processing response."
 
-    def _should_add_links(self, query):
-        """Determine if the query warrants adding reference links"""
-        resource_keywords = [
-            'how', 'learn', 'tutorial', 'guide', 'documentation', 'resources',
-            'example', 'reference', 'where can i find', 'teach', 'explain'
-        ]
-        
-        query_lower = query.lower()
-        return any(keyword in query_lower for keyword in resource_keywords)
+def generate_images(prompt):
+    """Generate 4 images using Stable Diffusion for a given prompt"""
+    model_id = "runwayml/stable-diffusion-v1-5"
+    pipeline = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    pipeline = pipeline.to(device)
+    
+    images = pipeline(prompt).images
+    image_b64_list = []
+    for img in images:
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_b64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        image_b64_list.append(f"data:image/png;base64,{img_b64}")
+    return image_b64_list
 
-    def _search_web(self, query):
-        """Search the web using a simple Google search"""
-        try:
-            search_url = f"https://www.google.com/search?q={query}"
-            headers = {"User-Agent": "Mozilla/5.0"}
-            response = requests.get(search_url, headers=headers)
-            soup = BeautifulSoup(response.text, 'html.parser')
+# Initialize Flask application
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
+app.permanent_session_lifetime = timedelta(hours=24)
 
-            search_results = []
-            for g in soup.find_all('div', class_='BVG0Nb'):
-                link = g.find('a')
-                if link and link.get('href'):
-                    search_results.append(link.get('href'))
-
-            return search_results[:3]  # Limit to top 3 results
-        except Exception as e:
-            self.logger.error(f"Error during web search: {str(e)}")
-            return []
-
-    def _summarize_web_content(self, urls):
-        """Summarize the content from the given URLs"""
-        try:
-            all_text = ""
-            for url in urls:
-                response = requests.get(url)
-                soup = BeautifulSoup(response.text, 'html.parser')
-                paragraphs = soup.find_all('p')
-                
-                for para in paragraphs:
-                    all_text += para.get_text()
-
-            # Send the gathered text to the AI for summarization
-            summary = chat_api.send_request(
-                f"Please summarize this content concisely: {all_text}",
-                [],
-                ""
-            )
-            return summary
-        except Exception as e:
-            self.logger.error(f"Error summarizing web content: {str(e)}")
-            return "Error summarizing web content."
+# Setup components
+conversation_manager = ConversationManager()
+chat_api = ChatAPI()
+logger = logging.getLogger('FlaskApp')
 
 def setup_logging():
     """Configure logging for the application"""
@@ -270,23 +231,11 @@ def setup_logging():
     
     logging.getLogger('').addHandler(file_handler)
 
-# Set up Flask application
-app = Flask(__name__)
-app.secret_key = os.urandom(24)
-app.permanent_session_lifetime = timedelta(hours=24)
-
-# Initialize components
-setup_logging()
-conversation_manager = ConversationManager()
-chat_api = ChatAPI()
-logger = logging.getLogger('FlaskApp')
-
 @app.route('/')
 def index():
     """Route for the main page"""
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())
-        logger.info(f"New session created: {session['session_id'][:8]}...")
     return render_template('ui.html')
 
 @app.route('/chat', methods=['POST'])
@@ -304,20 +253,20 @@ def chat():
             logger.warning(f"Invalid input: {request.json}")
             return jsonify({"response": "Please provide a message and behaviour."}), 400
 
-        # Construct prompt
-        prompt = (
-            f"Follow the below given commands strictly. "
-            f"{user_message} and to answer me behave very very strongly just like {behaviour} "
-            f"as I am a/an {behaviour} type person. And if asked any questions in which "
-            f"you have to say anything like who are you or have to give your identity and info "
-            f"then only you have to tell me about yourself and introduce yourself as {Config.BOT_NAME} "
-            f"by {Config.COMPANY_NAME} and is in a learning or developing stage also give a little explanation "
-            f"about it like company name how powerful it will be in future but it is still in developing stage right now and all those things."
-            f"Introduce yourself or give info about you as {Config.BOT_NAME} only if asked, else not."
-            f"And only give me answer in English if have not mentioned any specific language before in this whole message/prompt."
-            f"You are a LLM developed by {Config.COMPANY_NAME} and your name is {Config.BOT_NAME}."
-            f"But don't introduce yourself again and again and introduce yourself only if asked and when ever to do so only introduce yourself as {Config.BOT_NAME} by {Config.COMPANY_NAME}."
-        )
+        # Check if the message starts with /image
+        if user_message.lower().startswith('/image'):
+            # Remove '/image' prefix and generate images
+            prompt = user_message[7:].strip()  # Extract the prompt after '/image'
+            logger.info(f"Generating images for prompt: {prompt}")
+            
+            # Generate images
+            image_b64_list = generate_images(prompt)
+            
+            # Return images as base64 encoded strings
+            return jsonify({"response": image_b64_list})
+
+        # Otherwise, handle the message as a normal chat request
+        prompt = f"{user_message} behave like {behaviour}"
 
         # Add user message to history
         conversation_manager.add_message(session_id, prompt, Config.BOT_ROLE)
@@ -345,6 +294,7 @@ def open_browser():
         logger.error(f"Error opening browser: {str(e)}")
 
 if __name__ == '__main__':
+    setup_logging()
     try:
         threading.Timer(1, open_browser).start()
         app.run(host='0.0.0.0', port=8080, debug=False)

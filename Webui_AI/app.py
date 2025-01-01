@@ -149,7 +149,13 @@ class ChatAPI:
                         search_results = self._search_web(inputs)
                         web_summary = self._summarize_web_content(search_results)
                         return web_summary
-                    return ai_response
+                    else:
+                        # Add links if found
+                        links = self._search_web(inputs)
+                        formatted_response = ai_response + "\n\nHere are some useful links:\n"
+                        for link in links[:5]:  # Limit to max 5 links
+                            formatted_response += f"--> ({link})\n"
+                        return formatted_response
                 elif response.status_code in (401, 429):
                     self.logger.warning(f"Attempt {attempt + 1}: Status {response.status_code}")
                     if attempt == Config.MAX_RETRIES - 1:
@@ -204,7 +210,7 @@ class ChatAPI:
                 if link and link.get('href'):
                     search_results.append(link.get('href'))
 
-            return search_results[:3]  # Limit to top 3 results
+            return search_results[:5]  # Limit to top 5 results
         except Exception as e:
             self.logger.error(f"Error during web search: {str(e)}")
             return []

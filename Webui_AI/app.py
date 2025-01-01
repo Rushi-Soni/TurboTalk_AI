@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, jsonify, session
 from colorama import init
 from termcolor import colored
 from logging.handlers import RotatingFileHandler
+from bs4 import BeautifulSoup
 
 # Initialize colorama for cross-platform compatibility
 init(autoreset=True)
@@ -138,9 +139,17 @@ class ChatAPI:
                     headers=self.headers,
                     timeout=30
                 )
-                
+
                 if response.status_code == 200:
-                    return self._process_response(response)
+                    ai_response = self._process_response(response)
+                    
+                    # Check if the AI response indicates it cannot fulfill the request
+                    if "I cannot fulfill this request" in ai_response or "unable to process" in ai_response:
+                        # Perform web search and summarize the content
+                        search_results = self._search_web(inputs)
+                        web_summary = self._summarize_web_content(search_results)
+                        return web_summary
+                    return ai_response
                 elif response.status_code in (401, 429):
                     self.logger.warning(f"Attempt {attempt + 1}: Status {response.status_code}")
                     if attempt == Config.MAX_RETRIES - 1:
@@ -148,7 +157,7 @@ class ChatAPI:
                     threading.Event().wait(2 ** attempt)  # Exponential backoff
                 else:
                     return f"Error: {response.status_code}"
-                    
+
             except requests.exceptions.RequestException as e:
                 self.logger.error(f"Request error: {str(e)}")
                 if attempt == Config.MAX_RETRIES - 1:
@@ -174,10 +183,50 @@ class ChatAPI:
                         continue
                         
             return "".join(content_values) or "No response generated."
-            
+
         except Exception as e:
             self.logger.error(f"Error processing response: {str(e)}")
             return "Error processing response."
+
+    def _search_web(self, query):
+        """Search the web using a simple Google search"""
+        try:
+            # For this example, we're using BeautifulSoup to scrape the web
+            search_url = f"https://www.google.com/search?q={query}"
+            headers = {"User-Agent": "Mozilla/5.0"}
+            response = requests.get(search_url, headers=headers)
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Extract first few results
+            search_results = []
+            for g in soup.find_all('div', class_='BVG0Nb'):
+                link = g.find('a')
+                if link and link.get('href'):
+                    search_results.append(link.get('href'))
+
+            return search_results[:3]  # Limit to top 3 results
+        except Exception as e:
+            self.logger.error(f"Error during web search: {str(e)}")
+            return []
+
+    def _summarize_web_content(self, urls):
+        """Summarize the content from the given URLs"""
+        try:
+            all_text = ""
+            for url in urls:
+                response = requests.get(url)
+                soup = BeautifulSoup(response.text, 'html.parser')
+                paragraphs = soup.find_all('p')
+
+                # Collect text from paragraphs
+                for para in paragraphs:
+                    all_text += para.get_text()
+
+            # Send the gathered text to the AI for summarization
+            return chat_api.send_request(all_text, [], "")
+        except Exception as e:
+            self.logger.error(f"Error summarizing web content: {str(e)}")
+            return "Error summarizing web content."
 
 def setup_logging():
     """Configure logging for the application"""

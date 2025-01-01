@@ -147,15 +147,20 @@ class ChatAPI:
                     if "I cannot fulfill this request" in ai_response or "unable to process" in ai_response:
                         # Perform web search and summarize the content
                         search_results = self._search_web(inputs)
-                        web_summary = self._summarize_web_content(search_results)
-                        return web_summary
+                        return self._summarize_web_content(search_results)
                     else:
-                        # Add links if found
-                        links = self._search_web(inputs)
-                        formatted_response = ai_response + "\n\nHere are some useful links:\n"
-                        for link in links[:5]:  # Limit to max 5 links
-                            formatted_response += f"--> ({link})\n"
-                        return formatted_response
+                        # Only add links if the query appears to be asking for references or resources
+                        if self._should_add_links(inputs):
+                            links = self._search_web(inputs)
+                            if links:
+                                formatted_response = ai_response.rstrip()
+                                if not formatted_response.endswith('.'):
+                                    formatted_response += '.'
+                                formatted_response += "\n\nRelevant resources:\n"
+                                for link in links[:3]:  # Limit to max 3 links
+                                    formatted_response += f"• {link}\n"
+                                return formatted_response
+                        return ai_response
                 elif response.status_code in (401, 429):
                     self.logger.warning(f"Attempt {attempt + 1}: Status {response.status_code}")
                     if attempt == Config.MAX_RETRIES - 1:
@@ -194,23 +199,31 @@ class ChatAPI:
             self.logger.error(f"Error processing response: {str(e)}")
             return "Error processing response."
 
+    def _should_add_links(self, query):
+        """Determine if the query warrants adding reference links"""
+        resource_keywords = [
+            'how', 'learn', 'tutorial', 'guide', 'documentation', 'resources',
+            'example', 'reference', 'where can i find', 'teach', 'explain'
+        ]
+        
+        query_lower = query.lower()
+        return any(keyword in query_lower for keyword in resource_keywords)
+
     def _search_web(self, query):
         """Search the web using a simple Google search"""
         try:
-            # For this example, we're using BeautifulSoup to scrape the web
             search_url = f"https://www.google.com/search?q={query}"
             headers = {"User-Agent": "Mozilla/5.0"}
             response = requests.get(search_url, headers=headers)
             soup = BeautifulSoup(response.text, 'html.parser')
 
-            # Extract first few results
             search_results = []
             for g in soup.find_all('div', class_='BVG0Nb'):
                 link = g.find('a')
                 if link and link.get('href'):
                     search_results.append(link.get('href'))
 
-            return search_results[:5]  # Limit to top 5 results
+            return search_results[:3]  # Limit to top 3 results
         except Exception as e:
             self.logger.error(f"Error during web search: {str(e)}")
             return []
@@ -223,13 +236,17 @@ class ChatAPI:
                 response = requests.get(url)
                 soup = BeautifulSoup(response.text, 'html.parser')
                 paragraphs = soup.find_all('p')
-
-                # Collect text from paragraphs
+                
                 for para in paragraphs:
                     all_text += para.get_text()
 
             # Send the gathered text to the AI for summarization
-            return chat_api.send_request(all_text, [], "")
+            summary = chat_api.send_request(
+                f"Please summarize this content concisely: {all_text}",
+                [],
+                ""
+            )
+            return summary
         except Exception as e:
             self.logger.error(f"Error summarizing web content: {str(e)}")
             return "Error summarizing web content."
@@ -238,11 +255,9 @@ def setup_logging():
     """Configure logging for the application"""
     logging.basicConfig(level=logging.INFO)
     
-    # Create logs directory if it doesn't exist
     if not os.path.exists('logs'):
         os.makedirs('logs')
     
-    # Set up file handler with rotation
     file_handler = RotatingFileHandler(
         os.path.join('logs', Config.LOG_FILE),
         maxBytes=Config.LOG_MAX_SIZE,
@@ -253,7 +268,6 @@ def setup_logging():
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     ))
     
-    # Add handler to root logger
     logging.getLogger('').addHandler(file_handler)
 
 # Set up Flask application

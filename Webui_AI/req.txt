@@ -16,3 +16,5 @@ gunicorn
 termcolor
 beautifulsoup4 
 requests
+diffusers 
+torch

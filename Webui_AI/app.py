@@ -144,7 +144,7 @@ class ChatAPI:
                     ai_response = self._process_response(response)
                     
                     # Check if the AI response indicates it cannot fulfill the request
-                    if "I cannot fulfill this request" in ai_response or "unable to process" in ai_response:
+                    if "I cannot fulfill this request" in ai_response or "I'm sorry, but I can't fulfill this request." in ai_response:
                         # Perform web search and summarize the content
                         search_results = self._search_web(inputs)
                         return self._summarize_web_content(search_results)

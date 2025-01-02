@@ -5,6 +5,7 @@ import requests
 import threading
 import webbrowser
 import uuid
+import time
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, session
 from colorama import init
@@ -35,6 +36,79 @@ class Config:
     LOG_FILE = "chat_app.log"
     LOG_MAX_SIZE = 1 * 1024 * 1024  # 1 MB
     LOG_BACKUP_COUNT = 5
+
+class ConversationManager:
+    """Manages chat conversations and their histories"""
+    def __init__(self):
+        self.conversations = {}
+        self.last_accessed = {}
+        # Start cleanup thread
+        cleanup_thread = threading.Thread(target=self._cleanup_old_sessions, daemon=True)
+        cleanup_thread.start()
+    
+    def add_message(self, session_id, message, role):
+        """Add a message to the conversation history"""
+        if session_id not in self.conversations:
+            self.conversations[session_id] = []
+        
+        self.conversations[session_id].append({
+            "role": role,
+            "content": message,
+            "timestamp": datetime.now().isoformat()
+        })
+        self.last_accessed[session_id] = datetime.now()
+    
+    def get_history(self, session_id):
+        """Get the conversation history for a session"""
+        self.last_accessed[session_id] = datetime.now()
+        return self.conversations.get(session_id, [])
+    
+    def _cleanup_old_sessions(self):
+        """Periodically clean up old sessions"""
+        while True:
+            current_time = datetime.now()
+            sessions_to_remove = []
+            
+            for session_id, last_access in self.last_accessed.items():
+                if (current_time - last_access).total_seconds() > Config.SESSION_TIMEOUT:
+                    sessions_to_remove.append(session_id)
+            
+            for session_id in sessions_to_remove:
+                self.conversations.pop(session_id, None)
+                self.last_accessed.pop(session_id, None)
+                logging.info(f"Cleaned up session: {session_id[:8]}...")
+            
+            time.sleep(Config.CLEANUP_INTERVAL)
+
+class ChatAPI:
+    """Handles communication with the chat API"""
+    def __init__(self):
+        self.session = requests.Session()
+        self.logger = logging.getLogger('FlaskApp.ChatAPI')
+    
+    def send_request(self, message, history, session_id):
+        """Send a request to the chat API"""
+        retries = 0
+        while retries < Config.MAX_RETRIES:
+            try:
+                payload = {
+                    "message": message,
+                    "history": history,
+                    "session_id": session_id,
+                    "model": Config.MODEL
+                }
+                
+                response = self.session.post(Config.API_URL, json=payload)
+                response.raise_for_status()
+                
+                return response.json()["response"]
+                
+            except requests.RequestException as e:
+                retries += 1
+                self.logger.error(f"API request failed (attempt {retries}): {str(e)}")
+                if retries == Config.MAX_RETRIES:
+                    return "I apologize, but I'm having trouble connecting to my services right now. Please try again later."
+                time.sleep(1)  # Wait before retrying
 
 def setup_logging():
     """Set up logging configuration."""
@@ -114,8 +188,8 @@ def chat():
             "in spanish", "in french", "in german", "in italian", "in chinese",
             "in japanese", "in korean", "in russian", "in hindi", "in arabic",
             "en español", "en francés", "auf deutsch", "in italiano", "用中文",
-            "en japonés", "한국어로", "по-русски", "हिंदी में", "बالعربية",
-            "translate to", "respond in", "answer in", "reply in", "speak in"
+            "en japonés", "한국어로", "по-русски", "हिंदी में", "بالعربية",
+            "translate to", "respond in", "answer in", "reply in", "speak in", "in hindi", "in gujarati"
         ]
         
         specified_language = None

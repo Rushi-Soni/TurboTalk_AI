@@ -166,7 +166,13 @@ def open_browser():
 
 if __name__ == '__main__':
     try:
-        threading.Timer(1, open_browser).start()
-        app.run(host='0.0.0.0', port=8080, debug=False)
+        # Get port from environment variable or use default
+        port = int(os.environ.get('PORT', 8080))
+        
+        # Only open browser if running locally (not on Render)
+        if 'RENDER' not in os.environ:
+            threading.Timer(1, open_browser).start()
+        
+        app.run(host='0.0.0.0', port=port, debug=False)
     except Exception as e:
         logger.critical(f"Application failed to start: {str(e)}")

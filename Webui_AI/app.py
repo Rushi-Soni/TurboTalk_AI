@@ -36,6 +36,18 @@ class Config:
     LOG_MAX_SIZE = 1 * 1024 * 1024  # 1 MB
     LOG_BACKUP_COUNT = 5
 
+def setup_logging():
+    """Set up logging configuration."""
+    log_handler = RotatingFileHandler(
+        Config.LOG_FILE, maxBytes=Config.LOG_MAX_SIZE, backupCount=Config.LOG_BACKUP_COUNT
+    )
+    log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    
+    # Add log handler to the root logger
+    logging.basicConfig(level=logging.INFO, handlers=[log_handler])
+    logger = logging.getLogger('FlaskApp')
+    logger.info("Logging setup complete.")
+
 def generate_images(prompt):
     """Generate 4 images using Stable Diffusion for a given prompt"""
     model_id = "runwayml/stable-diffusion-v1-5"
@@ -102,7 +114,7 @@ def chat():
             "in spanish", "in french", "in german", "in italian", "in chinese",
             "in japanese", "in korean", "in russian", "in hindi", "in arabic",
             "en español", "en francés", "auf deutsch", "in italiano", "用中文",
-            "en japonés", "한국어로", "по-русски", "हिंदी में", "بالعربية",
+            "en japonés", "한국어로", "по-русски", "हिंदी में", "बالعربية",
             "translate to", "respond in", "answer in", "reply in", "speak in"
         ]
         

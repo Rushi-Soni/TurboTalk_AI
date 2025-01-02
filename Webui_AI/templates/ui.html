@@ -343,184 +343,153 @@
     </footer>
 
     <script>
-        $(document).ready(function () {
-    const chatBox = $('#chatBox');
-    const messageInput = $('#messageInput');
-    const behaviorSelect = $('#behaviorSelect');
-    const sendButton = $('#sendButton');
-    const typingIndicator = $('#typingIndicator');
+    $(document).ready(function () {
+        const chatBox = $('#chatBox');
+        const messageInput = $('#messageInput');
+        const behaviorSelect = $('#behaviorSelect');
+        const sendButton = $('#sendButton');
+        const typingIndicator = $('#typingIndicator');
 
-    setTimeout(() => {
-        addMessage("👋 Hello! I'm TurboTalk, your AI assistant. How can I help you today?", false);
-    }, 1000);
+        setTimeout(() => {
+            addMessage("Welcome to TurboTalk. I'm here to assist you with any questions or tasks you may have.", false);
+        }, 1000);
 
-    function addMessage(message, isUser) {
-        const messageDiv = $('<div>')
-            .addClass('message')
-            .addClass(isUser ? 'user-message' : 'bot-message')
-            .css('opacity', '0');
+        function addMessage(message, isUser) {
+            const messageDiv = $('<div>')
+                .addClass('message')
+                .addClass(isUser ? 'user-message' : 'bot-message')
+                .css('opacity', '0');
 
-        if (isUser) {
-            messageDiv.text(message);
-        } else {
-            // Modify this to handle HTML and code output
-            if (message.startsWith('```') && message.endsWith('```')) {
-                // If message looks like a code block
-                const codeContent = message.replace(/```/g, '').trim();
-                const codeDiv = $('<div>')
-                    .addClass('code-output')
-                    .text(codeContent);
-                messageDiv.append(codeDiv);
-            } else if (message.includes('&lt;') && message.includes('&gt;')) {
-                // If message contains HTML-escaped tags, display as text
-                const escapedContent = message
-                    .replace(/&lt;/g, '<')
-                    .replace(/&gt;/g, '>')
-                    .replace(/&amp;/g, '&');
-                
-                const codeDiv = $('<div>')
-                    .addClass('code-output')
-                    .text(escapedContent);
-                messageDiv.append(codeDiv);
+            if (isUser) {
+                messageDiv.text(message);
             } else {
-                // Normal message rendering
-                messageDiv.html(message);
+                if (message.startsWith('```') && message.endsWith('```')) {
+                    const codeContent = message.replace(/```/g, '').trim();
+                    const codeDiv = $('<div>')
+                        .addClass('code-output')
+                        .text(codeContent);
+                    messageDiv.append(codeDiv);
+                } else if (message.includes('&lt;') && message.includes('&gt;')) {
+                    const escapedContent = message
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&amp;/g, '&');
+                    
+                    const codeDiv = $('<div>')
+                        .addClass('code-output')
+                        .text(escapedContent);
+                    messageDiv.append(codeDiv);
+                } else {
+                    messageDiv.html(message);
+                }
             }
+
+            typingIndicator.before(messageDiv);
+            messageDiv.animate({ opacity: 1 }, 500);
+            chatBox.animate({ scrollTop: chatBox[0].scrollHeight }, 500);
         }
 
-        typingIndicator.before(messageDiv);
-        messageDiv.animate({ opacity: 1 }, 500);
-        chatBox.animate({ scrollTop: chatBox[0].scrollHeight }, 500);
-    }
+        function sendMessage() {
+            const message = messageInput.val().trim();
+            const behavior = behaviorSelect.val();
 
-    function sendMessage() {
-        const message = messageInput.val().trim();
-        const behavior = behaviorSelect.val();
+            if (message === '') return;
 
-        if (message === '') return;
+            addMessage(message, true);
+            messageInput.val('');
+            sendButton.prop('disabled', true);
+            typingIndicator.show();
 
-        addMessage(message, true);
-        messageInput.val('');
-        sendButton.prop('disabled', true);
-        typingIndicator.show();
-
-        $.ajax({
-            url: '/chat',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                message: message,
-                behaviour: behavior
-            }),
-            success: function (response) {
-                typingIndicator.hide();
-                if (response.response === "There was an issue connecting to the server. Please reload the page and enter your message again.") {
-                    addMessage(response.response, false);
-                } else {
-                    setTimeout(() => {
+            $.ajax({
+                url: '/chat',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    message: message,
+                    behaviour: behavior
+                }),
+                success: function (response) {
+                    typingIndicator.hide();
+                    if (response.response === "There was an issue connecting to the server. Please reload the page and enter your message again.") {
                         addMessage(response.response, false);
-                    }, 500);
+                    } else {
+                        setTimeout(() => {
+                            addMessage(response.response, false);
+                        }, 500);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    typingIndicator.hide();
+                    if (xhr.status === 0) {
+                        addMessage("Connection error: Please check your internet connection and try again.", false);
+                    } else {
+                        addMessage("An error occurred. Please try again later.", false);
+                    }
+                },
+                complete: function () {
+                    sendButton.prop('disabled', false);
                 }
-            },
-            error: function (xhr, status, error) {
-                typingIndicator.hide();
-                if (xhr.status === 0) {
-                    addMessage("⚠️ Unable to connect to the server. Please check your internet connection.", false);
-                } else {
-                    addMessage("⚠️ An unexpected error occurred. Please try again later.", false);
-                }
-            },
-            complete: function () {
-                sendButton.prop('disabled', false);
+            });
+        }
+
+        behaviorSelect.on('mouseover', function () {
+            $(this).css('transform', 'scale(1.02)');
+        }).on('mouseout', function () {
+            $(this).css('transform', 'scale(1)');
+        });
+
+        sendButton.click(sendMessage);
+
+        messageInput.keypress(function (e) {
+            if (e.which === 13) {
+                sendMessage();
             }
         });
-    }
 
-    behaviorSelect.on('mouseover', function () {
-        $(this).css('transform', 'scale(1.02)');
-    }).on('mouseout', function () {
-        $(this).css('transform', 'scale(1)');
-    });
-
-    sendButton.click(sendMessage);
-
-    messageInput.keypress(function (e) {
-        if (e.which === 13) {
-            sendMessage();
-        }
-    });
-
-    sendButton.on('click', function (e) {
-        const button = $(this);
-        const ripple = $('<span></span>').css({
-            position: 'absolute',
-            background: 'rgba(255,255,255,0.7)',
-            borderRadius: '50%',
-            transform: 'scale(0)',
-            animation: 'ripple 0.6s linear',
-            left: e.clientX - button.offset().left,
-            top: e.clientY - button.offset().top
+        sendButton.on('click', function (e) {
+            const button = $(this);
+            const ripple = $('<span></span>').css({
+                position: 'absolute',
+                background: 'rgba(255,255,255,0.7)',
+                borderRadius: '50%',
+                transform: 'scale(0)',
+                animation: 'ripple 0.6s linear',
+                left: e.clientX - button.offset().left,
+                top: e.clientY - button.offset().top
+            });
+            button.append(ripple);
+            setTimeout(() => ripple.remove(), 600);
         });
-        button.append(ripple);
-        setTimeout(() => ripple.remove(), 600);
     });
-});
-      // Function to escape HTML to prevent rendering
-function escapeHtml(unsafe) {
-    return unsafe
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
-}
 
-// Modify the addMessage function
-function addMessage(message, isUser) {
-    const messageDiv = $('<div>')
-        .addClass('message')
-        .addClass(isUser ? 'user-message' : 'bot-message')
-        .css('opacity', '0');
+    // Function to escape HTML to prevent rendering
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
-    if (isUser) {
-        messageDiv.text(message);
-    } else {
-        // Always escape HTML content for bot messages
-        const escapedMessage = escapeHtml(message);
-        
-        // If the message looks like code (starts with ```), preserve formatting
-        if (message.startsWith('```') && message.endsWith('```')) {
-            const codeContent = message.replace(/```/g, '').trim();
-            messageDiv.html(`<pre class="code-output">${escapeHtml(codeContent)}</pre>`);
-        } else {
-            // Regular message, but still escaped
-            messageDiv.html(escapedMessage);
+    // Additional style for code output
+    const codeStyle = `
+    <style>
+        .code-output {
+            background-color: rgba(0,0,0,0.3);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 10px 0;
         }
-    }
+    </style>
+    `;
 
-    typingIndicator.before(messageDiv);
-    messageDiv.animate({ opacity: 1 }, 500);
-    chatBox.animate({ scrollTop: chatBox[0].scrollHeight }, 500);
-}
-
-// Additional style for code output
-const codeStyle = `
-<style>
-    .code-output {
-        background-color: rgba(0,0,0,0.3);
-        color: #e0e0e0;
-        font-family: 'Courier New', monospace;
-        padding: 10px;
-        border-radius: 5px;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        margin: 10px 0;
-    }
-</style>
-`;
-
-// Append the code style to the head of the document
-$('head').append(codeStyle);
-    </script>
+    // Append the code style to the head of the document
+    $('head').append(codeStyle);
+</script>
 </body>
 </html>

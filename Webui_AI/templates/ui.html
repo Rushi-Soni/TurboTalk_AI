@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,186 +6,304 @@
     <title>TurboTalk</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --bg: #f3f4f6;
-            --text: #1f2937;
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(26, 115, 232, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(26, 115, 232, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(26, 115, 232, 0.5); }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            background-attachment: fixed;
+            animation: gradient 15s ease infinite;
+            height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
         .header {
-            background: var(--primary);
-            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            animation: slideIn 1s ease-out;
+        }
 
         .chat-container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1rem;
             flex: 1;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            width: 95%;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.5s ease-out;
         }
 
         .chat-box {
-            background: white;
-            border-radius: 12px;
-            height: 60vh;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            overflow-y: auto;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 1rem;
             margin-bottom: 1rem;
+            overflow-y: auto;
+            min-height: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .chat-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .note {
+            background-color: rgba(255, 255, 0, 0.2);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .quote {
+            color: #4CAF50;
+            font-style: italic;
+        }
+
+        .single-quote {
+            color: #2196F3;
+            font-style: italic;
+        }
+
+        code {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
         }
 
         .message {
-            padding: 1rem;
-            border-radius: 10px;
+            white-space: pre-wrap;
             margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 15px;
             max-width: 80%;
-            animation: fadeIn 0.3s;
-            word-wrap: break-word;
+            animation: slideIn 0.5s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .message:hover {
+            transform: scale(1.02);
         }
 
         .user-message {
-            background: var(--primary);
-            color: white;
+            background: rgba(255, 255, 255, 0.2);
             margin-left: auto;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        .bot-message { background: #e5e7eb; }
-
-        .error-message {
-            background: #fee2e2;
-            color: #991b1b;
-            border-left: 4px solid #dc2626;
-        }
-
-        .typing-indicator {
-            display: none;
-            padding: 1rem;
-            color: #6b7280;
-            font-style: italic;
+        .bot-message {
+            background: rgba(0, 0, 0, 0.2);
+            margin-right: auto;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .input-container {
             display: flex;
             gap: 1rem;
-            margin-top: 1rem;
+            flex-direction: column;
+            animation: slideIn 0.5s ease-out;
         }
 
         .behavior-select {
-            padding: 0.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            min-width: 150px;
+            padding: 1rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            transition: all 0.3s ease;
             cursor: pointer;
-            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .message-input-group { flex: 1; display: flex; gap: 0.5rem; }
+        .behavior-select:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
 
-        #messageInput {
+        .behavior-select option {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .message-input-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        input[type="text"] {
             flex: 1;
-            padding: 0.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            transition: border-color 0.3s;
+            padding: 1rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        #messageInput:focus {
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        input[type="text"]:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            animation: glow 2s infinite;
         }
 
-        #sendButton {
-            padding: 0.75rem 1.5rem;
-            background: var(--primary);
+        button {
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 15px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: bold;
         }
 
-        #sendButton:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+        button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            animation: pulse 2s infinite;
         }
 
-        #sendButton:disabled {
-            background: #9ca3af;
+        button:disabled {
+            background: rgba(255, 255, 255, 0.05);
             cursor: not-allowed;
-            transform: none;
         }
 
-        .retry-button {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 0.5rem;
+        ::-webkit-scrollbar {
+            width: 10px;
         }
 
-        .connection-status {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .typing-indicator {
             display: none;
-            z-index: 1000;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 1rem;
+            animation: pulse 1s infinite;
         }
 
-        .connection-status.online {
-            background: #dcfce7;
-            color: #166534;
+        .typing-indicator span {
+            display: inline-block;
+            margin: 0 2px;
+            animation: bounce 0.6s infinite;
         }
 
-        .connection-status.offline {
-            background: #fee2e2;
-            color: #991b1b;
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
-
-        footer {
+            footer {
+            background-color: rgba(255, 255, 255, 0.1); /* Matches existing styles*/
+            backdrop-filter: blur(10px);
             text-align: center;
-            padding: 2rem;
-            background: white;
-            margin-top: auto;
-        }
-
-        footer a {
-            color: var(--primary);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-dark); /* Ensures text is readable */
+            animation: slideIn 0.5s ease-out;/* Add animation if desired */
             text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: var(--transition);
+            position: relative;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 768px) {
-            .input-container { flex-direction: column; }
-            .message { max-width: 90%; }
-            .header h1 { font-size: 2rem; }
-            .behavior-select { width: 100%; }
+      
+      .code-output {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #e0e0e0;
         }
     </style>
 </head>
@@ -196,14 +314,14 @@
     </div>
 
     <div class="chat-container">
-        <div id="chatBox" class="chat-box">
-            <div id="typingIndicator" class="typing-indicator">
-                TurboTalk is thinking...
+        <div class="chat-box" id="chatBox">
+            <div class="typing-indicator" id="typingIndicator">
+                TurboTalk is processing<span>.</span><span>.</span><span>.</span>
             </div>
         </div>
 
         <div class="input-container">
-            <select id="behaviorSelect" class="behavior-select">
+            <select class="behavior-select" id="behaviorSelect">
                 <option value="friendly">🤗 Friendly</option>
                 <option value="professional">👔 Professional</option>
                 <option value="casual">😊 Casual</option>
@@ -216,143 +334,162 @@
 
             <div class="message-input-group">
                 <input type="text" id="messageInput" placeholder="Type your message here..." />
-                <button id="sendButton">Send</button>
+                <button id="sendButton">Send Message</button>
             </div>
         </div>
     </div>
-
-    <div id="connectionStatus" class="connection-status"></div>
-
     <footer>
-        <p>Need help? <a href="mailto:rushisoni1209@gmail.com">Email us</a></p>
+        <p>Get Technical Help with the <a href="mailto:rushisoni1209@gmail.com">e-mail us</a></p>
     </footer>
 
     <script>
-        $(document).ready(function() {
-            let isConnected = true;
-            let retryCount = 0;
-            const maxRetries = 3;
+    $(document).ready(function () {
+        const chatBox = $('#chatBox');
+        const messageInput = $('#messageInput');
+        const behaviorSelect = $('#behaviorSelect');
+        const sendButton = $('#sendButton');
+        const typingIndicator = $('#typingIndicator');
 
-            function updateConnectionStatus(online) {
-                isConnected = online;
-                $('#connectionStatus')
-                    .text(online ? 'Connected' : 'Connection Lost')
-                    .removeClass(online ? 'offline' : 'online')
-                    .addClass(online ? 'online' : 'offline')
-                    .fadeIn()
-                    .delay(3000)
-                    .fadeOut();
-            }
+        setTimeout(() => {
+            addMessage("Welcome to TurboTalk. I'm here to assist you with any questions or tasks you may have.", false);
+        }, 1000);
 
-            function addMessage(message, isUser, isError = false) {
-                const messageDiv = $('<div>')
-                    .addClass(`message ${isUser ? 'user-message' : isError ? 'error-message' : 'bot-message'}`);
+        function addMessage(message, isUser) {
+            const messageDiv = $('<div>')
+                .addClass('message')
+                .addClass(isUser ? 'user-message' : 'bot-message')
+                .css('opacity', '0');
 
-                if (isError) {
-                    messageDiv.append(
-                        $('<div>').text(message),
-                        $('<button>')
-                            .addClass('retry-button')
-                            .text('Retry Connection')
-                            .click(() => {
-                                if (retryCount < maxRetries) {
-                                    retryCount++;
-                                    checkConnection();
-                                } else {
-                                    addMessage('Maximum retry attempts reached. Please refresh the page.', false, true);
-                                }
-                            })
-                    );
+            if (isUser) {
+                messageDiv.text(message);
+            } else {
+                if (message.startsWith('```') && message.endsWith('```')) {
+                    const codeContent = message.replace(/```/g, '').trim();
+                    const codeDiv = $('<div>')
+                        .addClass('code-output')
+                        .text(codeContent);
+                    messageDiv.append(codeDiv);
+                } else if (message.includes('&lt;') && message.includes('&gt;')) {
+                    const escapedContent = message
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&amp;/g, '&');
+                    
+                    const codeDiv = $('<div>')
+                        .addClass('code-output')
+                        .text(escapedContent);
+                    messageDiv.append(codeDiv);
                 } else {
-                    messageDiv.text(message);
+                    messageDiv.html(message);
                 }
-
-                $('#typingIndicator').before(messageDiv);
-                $('#chatBox').scrollTop($('#chatBox')[0].scrollHeight);
             }
 
-            function checkConnection() {
-                $.ajax({
-                    url: '/chat',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ message: 'ping', behaviour: 'system' }),
-                    timeout: 5000,
-                    success: () => {
-                        if (!isConnected) {
-                            updateConnectionStatus(true);
-                            retryCount = 0;
-                        }
-                    },
-                    error: () => {
-                        if (isConnected) updateConnectionStatus(false);
-                    }
-                });
-            }
+            typingIndicator.before(messageDiv);
+            messageDiv.animate({ opacity: 1 }, 500);
+            chatBox.animate({ scrollTop: chatBox[0].scrollHeight }, 500);
+        }
 
-            function sendMessage() {
-                const message = $('#messageInput').val().trim();
-                if (!message) return;
+        function sendMessage() {
+            const message = messageInput.val().trim();
+            const behavior = behaviorSelect.val();
 
-                if (!isConnected) {
-                    addMessage('Unable to send message: No connection to server', false, true);
-                    return;
-                }
+            if (message === '') return;
 
-                $('#messageInput').val('');
-                addMessage(message, true);
-                $('#sendButton').prop('disabled', true);
-                $('#typingIndicator').show();
+            addMessage(message, true);
+            messageInput.val('');
+            sendButton.prop('disabled', true);
+            typingIndicator.show();
 
-                $.ajax({
-                    url: '/chat',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        message: message,
-                        behaviour: $('#behaviorSelect').val()
-                    }),
-                    timeout: 10000,
-                    success: function(response) {
-                        $('#typingIndicator').hide();
-                        if (response.error) {
-                            addMessage(response.error, false, true);
-                        } else {
+            $.ajax({
+                url: '/chat',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    message: message,
+                    behaviour: behavior
+                }),
+                success: function (response) {
+                    typingIndicator.hide();
+                    if (response.response === "There was an issue connecting to the server. Please reload the page and enter your message again.") {
+                        addMessage(response.response, false);
+                    } else {
+                        setTimeout(() => {
                             addMessage(response.response, false);
-                        }
-                    },
-                    error: function(xhr, status) {
-                        $('#typingIndicator').hide();
-                        updateConnectionStatus(false);
-                        addMessage(
-                            status === 'timeout' 
-                                ? 'Request timed out. Please try again.' 
-                                : 'Connection error. Please check your internet connection.',
-                            false,
-                            true
-                        );
-                    },
-                    complete: function() {
-                        $('#sendButton').prop('disabled', false);
+                        }, 500);
                     }
-                });
-            }
-
-            $('#sendButton').click(sendMessage);
-            $('#messageInput').keypress(function(e) {
-                if (e.which === 13 && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
+                },
+                error: function (xhr, status, error) {
+                    typingIndicator.hide();
+                    if (xhr.status === 0) {
+                        addMessage("Connection error: Please check your internet connection and try again.", false);
+                    } else {
+                        addMessage("An error occurred. Please try again later.", false);
+                    }
+                },
+                complete: function () {
+                    sendButton.prop('disabled', false);
                 }
             });
+        }
 
-            // Initialize
-            checkConnection();
-            setInterval(checkConnection, 30000);
-            setTimeout(() => {
-                addMessage("Welcome to TurboTalk! How can I help you today?", false);
-            }, 1000);
+        behaviorSelect.on('mouseover', function () {
+            $(this).css('transform', 'scale(1.02)');
+        }).on('mouseout', function () {
+            $(this).css('transform', 'scale(1)');
         });
-    </script>
+
+        sendButton.click(sendMessage);
+
+        messageInput.keypress(function (e) {
+            if (e.which === 13) {
+                sendMessage();
+            }
+        });
+
+        sendButton.on('click', function (e) {
+            const button = $(this);
+            const ripple = $('<span></span>').css({
+                position: 'absolute',
+                background: 'rgba(255,255,255,0.7)',
+                borderRadius: '50%',
+                transform: 'scale(0)',
+                animation: 'ripple 0.6s linear',
+                left: e.clientX - button.offset().left,
+                top: e.clientY - button.offset().top
+            });
+            button.append(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    // Function to escape HTML to prevent rendering
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Additional style for code output
+    const codeStyle = `
+    <style>
+        .code-output {
+            background-color: rgba(0,0,0,0.3);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 10px 0;
+        }
+    </style>
+    `;
+
+    // Append the code style to the head of the document
+    $('head').append(codeStyle);
+</script>
 </body>
 </html>

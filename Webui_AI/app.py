@@ -1,3 +1,4 @@
+
 import json
 import logging
 import os
@@ -5,18 +6,11 @@ import requests
 import threading
 import webbrowser
 import uuid
-import time
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, session
 from colorama import init
 from termcolor import colored
 from logging.handlers import RotatingFileHandler
-from bs4 import BeautifulSoup
-from diffusers import StableDiffusionPipeline
-import torch
-from io import BytesIO
-import base64
-from PIL import Image
 
 # Initialize colorama for cross-platform compatibility
 init(autoreset=True)
@@ -38,105 +32,175 @@ class Config:
     LOG_BACKUP_COUNT = 5
 
 class ConversationManager:
-    """Manages chat conversations and their histories"""
+    """Manages conversation histories for different sessions"""
     def __init__(self):
         self.conversations = {}
-        self.last_accessed = {}
+        self.session_map = {}
+        self.cleanup_interval = Config.CLEANUP_INTERVAL
+        self.session_timeout = Config.SESSION_TIMEOUT
+        self.logger = logging.getLogger('ConversationManager')
+        
         # Start cleanup thread
         cleanup_thread = threading.Thread(target=self._cleanup_old_sessions, daemon=True)
         cleanup_thread.start()
     
+    def get_conversation_id(self, session_id):
+        """Get or create a conversation ID for a session"""
+        if session_id not in self.session_map:
+            conv_id = str(uuid.uuid4())
+            self.session_map[session_id] = conv_id
+            self.conversations[conv_id] = {
+                'history': [],
+                'last_access': datetime.now(),
+                'session_id': session_id
+            }
+            self.logger.info(f"Created new conversation for session {session_id[:8]}...")
+        return self.session_map[session_id]
+    
     def add_message(self, session_id, message, role):
         """Add a message to the conversation history"""
-        if session_id not in self.conversations:
-            self.conversations[session_id] = []
-        
-        self.conversations[session_id].append({
-            "role": role,
-            "content": message,
-            "timestamp": datetime.now().isoformat()
-        })
-        self.last_accessed[session_id] = datetime.now()
+        try:
+            conv_id = self.get_conversation_id(session_id)
+            self.conversations[conv_id]['history'].append({
+                'content': message,
+                'role': role,
+                'timestamp': datetime.now().isoformat()
+            })
+            self.conversations[conv_id]['last_access'] = datetime.now()
+            self.logger.debug(f"Added message for session {session_id[:8]}...")
+        except Exception as e:
+            self.logger.error(f"Error adding message: {str(e)}")
+            raise
     
     def get_history(self, session_id):
-        """Get the conversation history for a session"""
-        self.last_accessed[session_id] = datetime.now()
-        return self.conversations.get(session_id, [])
+        """Get conversation history for a session"""
+        try:
+            conv_id = self.get_conversation_id(session_id)
+            return self.conversations[conv_id]['history']
+        except Exception as e:
+            self.logger.error(f"Error getting history: {str(e)}")
+            return []
     
     def _cleanup_old_sessions(self):
         """Periodically clean up old sessions"""
         while True:
-            current_time = datetime.now()
-            sessions_to_remove = []
-            
-            for session_id, last_access in self.last_accessed.items():
-                if (current_time - last_access).total_seconds() > Config.SESSION_TIMEOUT:
-                    sessions_to_remove.append(session_id)
-            
-            for session_id in sessions_to_remove:
-                self.conversations.pop(session_id, None)
-                self.last_accessed.pop(session_id, None)
-                logging.info(f"Cleaned up session: {session_id[:8]}...")
-            
-            time.sleep(Config.CLEANUP_INTERVAL)
+            try:
+                current_time = datetime.now()
+                expired_convs = []
+                
+                for conv_id, data in self.conversations.items():
+                    if (current_time - data['last_access']).total_seconds() > self.session_timeout:
+                        expired_convs.append(conv_id)
+                        session_id = data['session_id']
+                        if session_id in self.session_map:
+                            del self.session_map[session_id]
+                
+                for conv_id in expired_convs:
+                    del self.conversations[conv_id]
+                    self.logger.info(f"Cleaned up conversation {conv_id[:8]}...")
+                
+                threading.Event().wait(self.cleanup_interval)
+            except Exception as e:
+                self.logger.error(f"Error in cleanup: {str(e)}")
+                threading.Event().wait(60)  # Wait a minute before retrying
 
 class ChatAPI:
     """Handles communication with the chat API"""
     def __init__(self):
-        self.session = requests.Session()
-        self.logger = logging.getLogger('FlaskApp.ChatAPI')
-    
-    def send_request(self, message, history, session_id):
-        """Send a request to the chat API"""
-        retries = 0
-        while retries < Config.MAX_RETRIES:
+        self.logger = logging.getLogger('ChatAPI')
+        self.headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "",
+            "Accept": "*/*",
+            "Accept-Encoding": "Identity",
+        }
+
+    def send_request(self, inputs, conversation_history, session_id):
+        """Send request to the API and process response"""
+        formatted_history = [
+            {'role': msg['role'], 'content': msg['content']}
+            for msg in conversation_history
+        ]
+
+        payload = {
+            "additional_extension_context": "",
+            "allow_magic_buttons": True,
+            "is_vscode_extension": True,
+            "message_history": formatted_history,
+            "requested_model": Config.MODEL,
+            "user_input": inputs,
+        }
+
+        for attempt in range(Config.MAX_RETRIES):
             try:
-                payload = {
-                    "message": message,
-                    "history": history,
-                    "session_id": session_id,
-                    "model": Config.MODEL
-                }
+                response = requests.post(
+                    Config.API_URL,
+                    json=payload,
+                    headers=self.headers,
+                    timeout=30
+                )
                 
-                response = self.session.post(Config.API_URL, json=payload)
-                response.raise_for_status()
-                
-                return response.json()["response"]
-                
-            except requests.RequestException as e:
-                retries += 1
-                self.logger.error(f"API request failed (attempt {retries}): {str(e)}")
-                if retries == Config.MAX_RETRIES:
-                    return "I apologize, but I'm having trouble connecting to my services right now. Please try again later."
-                time.sleep(1)  # Wait before retrying
+                if response.status_code == 200:
+                    return self._process_response(response)
+                elif response.status_code in (401, 429):
+                    self.logger.warning(f"Attempt {attempt + 1}: Status {response.status_code}")
+                    if attempt == Config.MAX_RETRIES - 1:
+                        return "Server is busy. Please try again later."
+                    threading.Event().wait(2 ** attempt)  # Exponential backoff
+                else:
+                    return f"Error: {response.status_code}"
+                    
+            except requests.exceptions.RequestException as e:
+                self.logger.error(f"Request error: {str(e)}")
+                if attempt == Config.MAX_RETRIES - 1:
+                    return "Network error. Please check your connection."
+
+    def _process_response(self, response):
+        """Process the API response"""
+        try:
+            response_content = response.content
+            lines = response_content.decode("utf-8").split("\r\n\r\n")
+            content_values = []
+            
+            for line in lines:
+                if line.startswith("data: "):
+                    try:
+                        data = json.loads(line.split("data: ")[1])
+                        choices = data.get("choices", [])
+                        for choice in choices:
+                            content = choice.get("delta", {}).get("content")
+                            if content:
+                                content_values.append(content)
+                    except json.JSONDecodeError:
+                        continue
+                        
+            return "".join(content_values) or "No response generated."
+            
+        except Exception as e:
+            self.logger.error(f"Error processing response: {str(e)}")
+            return "Error processing response."
 
 def setup_logging():
-    """Set up logging configuration."""
-    log_handler = RotatingFileHandler(
-        Config.LOG_FILE, maxBytes=Config.LOG_MAX_SIZE, backupCount=Config.LOG_BACKUP_COUNT
+    """Configure logging for the application"""
+    logging.basicConfig(level=logging.INFO)
+    
+    # Create logs directory if it doesn't exist
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    
+    # Set up file handler with rotation
+    file_handler = RotatingFileHandler(
+        os.path.join('logs', Config.LOG_FILE),
+        maxBytes=Config.LOG_MAX_SIZE,
+        backupCount=Config.LOG_BACKUP_COUNT
     )
-    log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     
-    # Add log handler to the root logger
-    logging.basicConfig(level=logging.INFO, handlers=[log_handler])
-    logger = logging.getLogger('FlaskApp')
-    logger.info("Logging setup complete.")
-
-def generate_images(prompt):
-    """Generate 4 images using Stable Diffusion for a given prompt"""
-    model_id = "runwayml/stable-diffusion-v1-5"
-    pipeline = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    pipeline = pipeline.to(device)
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
     
-    images = pipeline(prompt).images
-    image_b64_list = []
-    for img in images:
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_b64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        image_b64_list.append(f"data:image/png;base64,{img_b64}")
-    return image_b64_list
+    # Add handler to root logger
+    logging.getLogger('').addHandler(file_handler)
 
 # Set up Flask application
 app = Flask(__name__)
@@ -172,33 +236,7 @@ def chat():
             logger.warning(f"Invalid input: {request.json}")
             return jsonify({"response": "Please provide a message and behaviour."}), 400
 
-        # Check if the message starts with /image
-        if user_message.lower().startswith('/image'):
-            prompt = user_message[7:].strip()  # Extract the prompt after '/image'
-            logger.info(f"Generating images for prompt: {prompt}")
-            try:
-                image_b64_list = generate_images(prompt)
-                return jsonify({"response": image_b64_list})
-            except Exception as e:
-                logger.error(f"Error generating images: {str(e)}")
-                return jsonify({"response": "Error generating images. Please try again later."}), 500
-
-        # Check for language specification in user message
-        language_keywords = [
-            "in spanish", "in french", "in german", "in italian", "in chinese",
-            "in japanese", "in korean", "in russian", "in hindi", "in arabic",
-            "en español", "en francés", "auf deutsch", "in italiano", "用中文",
-            "en japonés", "한국어로", "по-русски", "हिंदी में", "بالعربية",
-            "translate to", "respond in", "answer in", "reply in", "speak in", "in hindi", "in gujarati"
-        ]
-        
-        specified_language = None
-        for keyword in language_keywords:
-            if keyword.lower() in user_message.lower():
-                specified_language = True
-                break
-
-        # Construct prompt with language handling
+        # Construct prompt
         prompt = (
             f"Follow the below given commands strictly. "
             f"{user_message} and to answer me behave very very strongly just like {behaviour} "
@@ -206,10 +244,10 @@ def chat():
             f"you have to say anything like who are you or have to give your identity and info "
             f"then only you have to tell me about yourself and introduce yourself as {Config.BOT_NAME} "
             f"by {Config.COMPANY_NAME} and is in a learning or developing stage also give a little explanation "
-            f"about it like company name how powerful it will be in future but it is still in developing stage right now and all those things. "
-            f"Introduce yourself or give info about you as {Config.BOT_NAME} only if asked, else not. "
-            f"{'Use only the language specified in the user message and do not translate or repeat in English.' if specified_language else 'Respond in English.'} "
-            f"You are a LLM developed by {Config.COMPANY_NAME} and your name is {Config.BOT_NAME}. "
+            f"about it like company name how powerful it will be in future but it is still in developing stage right now and all those things."
+            f"Introduce yourself or give info about you as {Config.BOT_NAME} only if asked, else not."
+            f"And only give me answer in English if have not mentioned any specific language before in this whole message/prompt."
+            f"You are a LLM developed by {Config.COMPANY_NAME} and your name is {Config.BOT_NAME}."
             f"But don't introduce yourself again and again and introduce yourself only if asked and when ever to do so only introduce yourself as {Config.BOT_NAME} by {Config.COMPANY_NAME}."
         )
 
@@ -240,13 +278,7 @@ def open_browser():
 
 if __name__ == '__main__':
     try:
-        # Get port from environment variable or use default
-        port = int(os.environ.get('PORT', 8080))
-        
-        # Only open browser if running locally (not on Render)
-        if 'RENDER' not in os.environ:
-            threading.Timer(1, open_browser).start()
-        
-        app.run(host='0.0.0.0', port=port, debug=False)
+        threading.Timer(1, open_browser).start()
+        app.run(host='0.0.0.0', port=8080, debug=False)
     except Exception as e:
         logger.critical(f"Application failed to start: {str(e)}")

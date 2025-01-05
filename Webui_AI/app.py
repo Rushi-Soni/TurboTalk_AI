@@ -1,4 +1,4 @@
-# app.py
+from flask import Flask, render_template, request, jsonify, session, send_file
 import json
 import logging
 import os
@@ -7,7 +7,6 @@ import threading
 import webbrowser
 import uuid
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, jsonify, session, send_file
 from colorama import init
 from termcolor import colored
 from logging.handlers import RotatingFileHandler
@@ -67,7 +66,6 @@ class ImageGenerator:
             images = []
             for _ in range(4):  # Generate 4 images
                 image = self.pipeline(prompt).images[0]
-                # Convert PIL image to bytes
                 img_byte_arr = io.BytesIO()
                 image.save(img_byte_arr, format='PNG')
                 img_byte_arr = img_byte_arr.getvalue()
@@ -168,7 +166,6 @@ class ChatAPI:
             {'role': msg['role'], 'content': msg['content']}
             for msg in conversation_history
         ]
-
         payload = {
             "additional_extension_context": "",
             "allow_magic_buttons": True,
@@ -177,7 +174,6 @@ class ChatAPI:
             "requested_model": Config.MODEL,
             "user_input": inputs,
         }
-
         for attempt in range(Config.MAX_RETRIES):
             try:
                 response = requests.post(
@@ -279,7 +275,6 @@ def chat():
         session_id = session['session_id']
         user_message = request.json.get('message', '').strip()
         behaviour = request.json.get('behaviour', '').strip()
-
         if not user_message or not behaviour:
             logger.warning(f"Invalid input: {request.json}")
             return jsonify({"response": "Please provide a message and behaviour."}), 400

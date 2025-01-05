@@ -497,6 +497,48 @@ footer a:hover {
 
     // Append the code style to the head of the document
     $('head').append(codeStyle);
+        // Add this to the existing JavaScript code
+function displayImages(imageUrls) {
+    const messageDiv = $('<div>')
+        .addClass('message bot-message')
+        .css('opacity', '0');
+
+    const imageContainer = $('<div>')
+        .addClass('image-grid')
+        .css({
+            'display': 'grid',
+            'grid-template-columns': 'repeat(2, 1fr)',
+            'gap': '10px',
+            'margin-top': '10px'
+        });
+
+    imageUrls.forEach(url => {
+        const img = $('<img>')
+            .attr('src', url)
+            .css({
+                'width': '100%',
+                'height': 'auto',
+                'border-radius': '5px'
+            });
+        imageContainer.append(img);
+    });
+
+    messageDiv.append("Generated images:");
+    messageDiv.append(imageContainer);
+    typingIndicator.before(messageDiv);
+    messageDiv.animate({ opacity: 1 }, 500);
+    chatBox.animate({ scrollTop: chatBox[0].scrollHeight }, 500);
+}
+
+// Modify the success handler in the sendMessage function
+success: function (response) {
+    typingIndicator.hide();
+    if (response.is_image) {
+        displayImages(response.images);
+    } else {
+        addMessage(response.response, false);
+    }
+}
 </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-
+# app.py
 import json
 import logging
 import os
@@ -7,10 +7,14 @@ import threading
 import webbrowser
 import uuid
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_file
 from colorama import init
 from termcolor import colored
 from logging.handlers import RotatingFileHandler
+from diffusers import StableDiffusionPipeline
+import torch
+from PIL import Image
+import io
 
 # Initialize colorama for cross-platform compatibility
 init(autoreset=True)
@@ -30,6 +34,49 @@ class Config:
     LOG_FILE = "chat_app.log"
     LOG_MAX_SIZE = 1 * 1024 * 1024  # 1 MB
     LOG_BACKUP_COUNT = 5
+    IMAGE_OUTPUT_DIR = "generated_images"
+
+class ImageGenerator:
+    """Handles image generation using Stable Diffusion"""
+    def __init__(self):
+        self.model_id = "runwayml/stable-diffusion-v1-5"
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.pipeline = None
+        self.logger = logging.getLogger('ImageGenerator')
+        
+    def initialize(self):
+        """Initialize the Stable Diffusion pipeline"""
+        try:
+            if self.pipeline is None:
+                self.pipeline = StableDiffusionPipeline.from_pretrained(
+                    self.model_id,
+                    torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+                )
+                self.pipeline = self.pipeline.to(self.device)
+            return True
+        except Exception as e:
+            self.logger.error(f"Error initializing image generator: {str(e)}")
+            return False
+    
+    def generate_images(self, prompt):
+        """Generate multiple images from a prompt"""
+        try:
+            if not self.initialize():
+                return None
+                
+            images = []
+            for _ in range(4):  # Generate 4 images
+                image = self.pipeline(prompt).images[0]
+                # Convert PIL image to bytes
+                img_byte_arr = io.BytesIO()
+                image.save(img_byte_arr, format='PNG')
+                img_byte_arr = img_byte_arr.getvalue()
+                images.append(img_byte_arr)
+                
+            return images
+        except Exception as e:
+            self.logger.error(f"Error generating images: {str(e)}")
+            return None
 
 class ConversationManager:
     """Manages conversation histories for different sessions"""
@@ -211,6 +258,7 @@ app.permanent_session_lifetime = timedelta(hours=24)
 setup_logging()
 conversation_manager = ConversationManager()
 chat_api = ChatAPI()
+image_generator = ImageGenerator()
 logger = logging.getLogger('FlaskApp')
 
 @app.route('/')
@@ -219,7 +267,7 @@ def index():
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())
         logger.info(f"New session created: {session['session_id'][:8]}...")
-    return render_template('ui.html')
+    return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -235,6 +283,38 @@ def chat():
         if not user_message or not behaviour:
             logger.warning(f"Invalid input: {request.json}")
             return jsonify({"response": "Please provide a message and behaviour."}), 400
+
+        # Check if this is an image generation request
+        if user_message.startswith('/img '):
+            image_prompt = user_message[5:].strip()  # Remove '/img ' prefix
+            images = image_generator.generate_images(image_prompt)
+            
+            if images:
+                # Save images and get their URLs
+                image_urls = []
+                for i, img_data in enumerate(images):
+                    filename = f"image_{session_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}.png"
+                    filepath = os.path.join(Config.IMAGE_OUTPUT_DIR, filename)
+                    
+                    # Ensure directory exists
+                    os.makedirs(Config.IMAGE_OUTPUT_DIR, exist_ok=True)
+                    
+                    # Save image
+                    with open(filepath, 'wb') as f:
+                        f.write(img_data)
+                    
+                    image_urls.append(f"/images/{filename}")
+                
+                return jsonify({
+                    "response": "Generated images:",
+                    "images": image_urls,
+                    "is_image": True
+                })
+            else:
+                return jsonify({
+                    "response": "Failed to generate images. Please try again.",
+                    "is_image": False
+                })
 
         # Construct prompt
         prompt = (
@@ -268,6 +348,11 @@ def chat():
     except Exception as e:
         logger.error(f"Error in chat endpoint: {str(e)}")
         return jsonify({"response": "An error occurred. Please try again."}), 500
+
+@app.route('/images/<path:filename>')
+def serve_image(filename):
+    """Serve generated images"""
+    return send_file(os.path.join(Config.IMAGE_OUTPUT_DIR, filename))
 
 def open_browser():
     """Open the browser when the application starts"""

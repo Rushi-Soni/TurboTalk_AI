@@ -181,9 +181,17 @@ def main():
             # Regular chat message
             behavior_text = behavior.split(" ")[1]  # Remove emoji
             prompt_with_behavior = (
-                f"Follow the below given commands strictly. "
-                f"{prompt} and to answer me behave very very strongly just like {behavior_text} "
-                f"as I am a/an {behavior_text} type person."
+            f"Follow the below given commands strictly. "
+            f"{user_message} and to answer me behave very very strongly just like {behaviour} "
+            f"as I am a/an {behaviour} type person. And if asked any questions in which "
+            f"you have to say anything like who are you or have to give your identity and info "
+            f"then only you have to tell me about yourself and introduce yourself as {Config.BOT_NAME} "
+            f"by {Config.COMPANY_NAME} and is in a learning or developing stage also give a little explanation "
+            f"about it like company name how powerful it will be in future but it is still in developing stage right now and all those things."
+            f"Introduce yourself or give info about you as {Config.BOT_NAME} only if asked, else not."
+            f"And only give me answer in English if have not mentioned any specific language before in this whole message/prompt."
+            f"You are a LLM developed by {Config.COMPANY_NAME} and your name is {Config.BOT_NAME}."
+            f"But don't introduce yourself again and again and introduce yourself only if asked and when ever to do so only introduce yourself as {Config.BOT_NAME} by {Config.COMPANY_NAME}."
             )
             
             # Add assistant response

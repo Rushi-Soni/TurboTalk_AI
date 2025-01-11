@@ -11,5 +11,9 @@
       "src": "/(.*)",
       "dest": "Webui_AI/app.py"
     }
-  ]
+  ],
+  "env": {
+    "PYTHONUNBUFFERED": "1"
+  },
+  "public": false
 }

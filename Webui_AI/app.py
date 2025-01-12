@@ -1,3 +1,4 @@
+# app.py
 import json
 import logging
 import os
@@ -219,11 +220,8 @@ class ChatAPI:
                                 content_values.append(content)
                     except json.JSONDecodeError:
                         continue
-            
-            # Join the content together to form the full response
-            response_text = "".join(content_values) or "No response generated."
-            
-            return response_text
+                        
+            return "".join(content_values) or "No response generated."
             
         except Exception as e:
             self.logger.error(f"Error processing response: {str(e)}")

@@ -6,14 +6,123 @@ INFO:werkzeug:WARNING: This is a development server. Do not use it in a producti
  * Running on http://127.0.0.1:8080
  * Running on http://10.64.134.32:8080
 INFO:werkzeug:Press CTRL+C to quit
-INFO:TurboTalkApp:New session created: bdbc48d5...
-INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:02:49] "HEAD / HTTP/1.1" 200 -
 INFO:TurboTalkApp:Processing request: Tell me about solar energy benefits...
-INFO:ConversationManager:Created new conversation for session 3e823ae3...
-INFO:WebScraper:Searching: https://www.google.com/search?q=Error%3A+403
-INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Error%3A+403
-INFO:WebScraper:Searching: https://www.google.com/search?q=Error%3A+403
-INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Error%3A+403
-INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:02:57] "POST /chat HTTP/1.1" 200 -
-INFO:TurboTalkApp:New session created: 657aa0b2...
-INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:03:08] "GET / HTTP/1.1" 200 -
+INFO:ConversationManager:Created new conversation for session be79c516...
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+INFO:WebScraper:Searching: https://www.google.com/search?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing%2C+installation%2C+and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms%2C+agrivoltaics+%28combining+agriculture+with+solar%29%2C+and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing%2C+installation%2C+and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms%2C+agrivoltaics+%28combining+agriculture+with+solar%29%2C+and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://www.google.com/search?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing
+INFO:WebScraper:Searching: https://www.google.com/search?q=installation
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=installation
+INFO:WebScraper:Searching: https://www.google.com/search?q=and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms
+INFO:WebScraper:Searching: https://www.google.com/search?q=agrivoltaics+%28combining+agriculture+with+solar%29
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=agrivoltaics+%28combining+agriculture+with+solar%29
+INFO:WebScraper:Searching: https://www.google.com/search?q=and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=and+transparent+solar+panels+for+building+integration.
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:05:57] "POST /chat HTTP/1.1" 200 -
+INFO:TurboTalkApp:Processing request: How can communities solve local environmental prob...
+INFO:ConversationManager:Created new conversation for session 6939e94a...
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+INFO:WebScraper:Searching: https://www.google.com/search?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing%2C+installation%2C+and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms%2C+agrivoltaics+%28combining+agriculture+with+solar%29%2C+and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing%2C+installation%2C+and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms%2C+agrivoltaics+%28combining+agriculture+with+solar%29%2C+and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://www.google.com/search?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing
+INFO:WebScraper:Searching: https://www.google.com/search?q=installation
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=installation
+INFO:WebScraper:Searching: https://www.google.com/search?q=and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms
+INFO:WebScraper:Searching: https://www.google.com/search?q=agrivoltaics+%28combining+agriculture+with+solar%29
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=agrivoltaics+%28combining+agriculture+with+solar%29
+INFO:WebScraper:Searching: https://www.google.com/search?q=and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=and+transparent+solar+panels+for+building+integration.
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:06:22] "POST /chat HTTP/1.1" 200 -
+INFO:TurboTalkApp:Processing request: What are some community solutions for local proble...
+INFO:ConversationManager:Created new conversation for session 29287148...
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+INFO:WebScraper:Searching: https://www.google.com/search?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing%2C+installation%2C+and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms%2C+agrivoltaics+%28combining+agriculture+with+solar%29%2C+and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing%2C+installation%2C+and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms%2C+agrivoltaics+%28combining+agriculture+with+solar%29%2C+and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://www.google.com/search?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing
+INFO:WebScraper:Searching: https://www.google.com/search?q=installation
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=installation
+INFO:WebScraper:Searching: https://www.google.com/search?q=and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms
+INFO:WebScraper:Searching: https://www.google.com/search?q=agrivoltaics+%28combining+agriculture+with+solar%29
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=agrivoltaics+%28combining+agriculture+with+solar%29
+INFO:WebScraper:Searching: https://www.google.com/search?q=and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=and+transparent+solar+panels+for+building+integration.
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:06:44] "POST /chat HTTP/1.1" 200 -
+INFO:TurboTalkApp:Processing request: Tell me about mental health and wellness...
+INFO:ConversationManager:Created new conversation for session 5beb7bbf...
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+INFO:WebScraper:Searching: https://www.google.com/search?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing%2C+installation%2C+and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms%2C+agrivoltaics+%28combining+agriculture+with+solar%29%2C+and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing%2C+installation%2C+and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms%2C+agrivoltaics+%28combining+agriculture+with+solar%29%2C+and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://www.google.com/search?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Solar+energy+offers+numerous+benefits+for+science+and+society%3A%0A%0A%2A%2AEnvironmental+Benefits%3A%2A%2A%0A%E2%80%A2+Zero+emissions+during+operation+-+no+air+pollution+or+greenhouse+gases%0A%E2%80%A2+Reduces+dependence+on+fossil+fuels%0A%E2%80%A2+Minimal+water+usage+compared+to+traditional+power+plants%0A%0A%2A%2AEconomic+Benefits%3A%2A%2A%0A%E2%80%A2+Decreasing+costs+-+solar+panels+are+80%25+cheaper+than+10+years+ago%0A%E2%80%A2+Job+creation+in+manufacturing
+INFO:WebScraper:Searching: https://www.google.com/search?q=installation
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=installation
+INFO:WebScraper:Searching: https://www.google.com/search?q=and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=and+maintenance%0A%E2%80%A2+Energy+independence+and+price+stability%0A%0A%2A%2AScientific+Advances%3A%2A%2A%0A%E2%80%A2+Photovoltaic+efficiency+has+improved+from+6%25+to+over+22%25+in+commercial+panels%0A%E2%80%A2+Perovskite+solar+cells+showing+potential+for+30%25%2B+efficiency%0A%E2%80%A2+Solar+storage+integration+with+battery+technology+advancing+rapidly%0A%0A%2A%2ACommunity+Impact%3A%2A%2A%0A%E2%80%A2+Decentralized+energy+production+empowers+local+communities%0A%E2%80%A2+Rural+electrification+in+developing+regions%0A%E2%80%A2+Reduced+grid+strain+during+peak+hours%0A%0AThe+latest+developments+include+floating+solar+farms
+INFO:WebScraper:Searching: https://www.google.com/search?q=agrivoltaics+%28combining+agriculture+with+solar%29
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=agrivoltaics+%28combining+agriculture+with+solar%29
+INFO:WebScraper:Searching: https://www.google.com/search?q=and+transparent+solar+panels+for+building+integration.
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=and+transparent+solar+panels+for+building+integration.
+WARNING:ChatAPI:Attempt 1: Status 403
+WARNING:ChatAPI:Attempt 2: Status 403
+WARNING:ChatAPI:Attempt 3: Status 403
+INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:07:11] "POST /chat HTTP/1.1" 200 -

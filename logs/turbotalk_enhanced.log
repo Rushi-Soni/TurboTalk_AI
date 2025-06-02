@@ -1,0 +1,33 @@
+2025-06-02 14:59:58,056 - TurboTalkApp - INFO - Starting Enhanced TurboTalk AI...
+2025-06-02 14:59:58,065 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.64.134.32:8080
+2025-06-02 14:59:58,065 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-02 15:02:02,515 - TurboTalkApp - INFO - Starting Enhanced TurboTalk AI...
+2025-06-02 15:02:09,049 - TurboTalkApp - INFO - New session created: c07e9acf...
+2025-06-02 15:02:09,056 - werkzeug - INFO - 127.0.0.1 - - [02/Jun/2025 15:02:09] "HEAD / HTTP/1.1" 200 -
+2025-06-02 15:02:15,860 - TurboTalkApp - INFO - Processing request: What are the latest developments in renewable ener...
+2025-06-02 15:02:15,861 - ConversationManager - INFO - Created new conversation for session 911eacb7...
+2025-06-02 15:02:16,308 - WebScraper - INFO - Searching: https://www.google.com/search?q=Error%3A+403
+2025-06-02 15:02:17,395 - WebScraper - INFO - Searching: https://duckduckgo.com/html/?q=Error%3A+403
+2025-06-02 15:02:19,343 - WebScraper - INFO - Searching: https://www.google.com/search?q=Error%3A+403
+2025-06-02 15:02:19,579 - WebScraper - INFO - Searching: https://duckduckgo.com/html/?q=Error%3A+403
+2025-06-02 15:02:20,662 - werkzeug - INFO - 127.0.0.1 - - [02/Jun/2025 15:02:20] "POST /chat HTTP/1.1" 200 -
+2025-06-02 15:02:41,801 - TurboTalkApp - INFO - Starting Enhanced TurboTalk AI...
+2025-06-02 15:02:41,808 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.64.134.32:8080
+2025-06-02 15:02:41,808 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-02 15:02:49,170 - TurboTalkApp - INFO - New session created: bdbc48d5...
+2025-06-02 15:02:49,176 - werkzeug - INFO - 127.0.0.1 - - [02/Jun/2025 15:02:49] "HEAD / HTTP/1.1" 200 -
+2025-06-02 15:02:54,909 - TurboTalkApp - INFO - Processing request: Tell me about solar energy benefits...
+2025-06-02 15:02:54,909 - ConversationManager - INFO - Created new conversation for session 3e823ae3...
+2025-06-02 15:02:55,393 - WebScraper - INFO - Searching: https://www.google.com/search?q=Error%3A+403
+2025-06-02 15:02:56,486 - WebScraper - INFO - Searching: https://duckduckgo.com/html/?q=Error%3A+403
+2025-06-02 15:02:56,831 - WebScraper - INFO - Searching: https://www.google.com/search?q=Error%3A+403
+2025-06-02 15:02:57,072 - WebScraper - INFO - Searching: https://duckduckgo.com/html/?q=Error%3A+403
+2025-06-02 15:02:57,276 - werkzeug - INFO - 127.0.0.1 - - [02/Jun/2025 15:02:57] "POST /chat HTTP/1.1" 200 -
+2025-06-02 15:03:08,244 - TurboTalkApp - INFO - New session created: 657aa0b2...
+2025-06-02 15:03:08,245 - werkzeug - INFO - 127.0.0.1 - - [02/Jun/2025 15:03:08] "GET / HTTP/1.1" 200 -

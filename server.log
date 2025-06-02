@@ -1,0 +1,19 @@
+INFO:TurboTalkApp:Starting Enhanced TurboTalk AI...
+ * Serving Flask app 'app'
+ * Debug mode: off
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.64.134.32:8080
+INFO:werkzeug:Press CTRL+C to quit
+INFO:TurboTalkApp:New session created: bdbc48d5...
+INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:02:49] "HEAD / HTTP/1.1" 200 -
+INFO:TurboTalkApp:Processing request: Tell me about solar energy benefits...
+INFO:ConversationManager:Created new conversation for session 3e823ae3...
+INFO:WebScraper:Searching: https://www.google.com/search?q=Error%3A+403
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Error%3A+403
+INFO:WebScraper:Searching: https://www.google.com/search?q=Error%3A+403
+INFO:WebScraper:Searching: https://duckduckgo.com/html/?q=Error%3A+403
+INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:02:57] "POST /chat HTTP/1.1" 200 -
+INFO:TurboTalkApp:New session created: 657aa0b2...
+INFO:werkzeug:127.0.0.1 - - [02/Jun/2025 15:03:08] "GET / HTTP/1.1" 200 -

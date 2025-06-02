@@ -514,6 +514,135 @@ class ChatAPI:
             self.logger.error(f"Error processing response: {str(e)}")
             return "Error processing response."
 
+    def _fallback_response(self, inputs, conversation_history):
+        """Provide intelligent fallback response when API is unavailable"""
+        # Analyze input to provide contextual response
+        input_lower = inputs.lower()
+        
+        # Science Education responses
+        if any(word in input_lower for word in ['physics', 'chemistry', 'biology', 'science', 'equation', 'theory', 'experiment']):
+            if 'solar' in input_lower or 'renewable' in input_lower or 'energy' in input_lower:
+                return """Solar energy offers numerous benefits for science and society:
+
+**Environmental Benefits:**
+• Zero emissions during operation - no air pollution or greenhouse gases
+• Reduces dependence on fossil fuels
+• Minimal water usage compared to traditional power plants
+
+**Economic Benefits:**
+• Decreasing costs - solar panels are 80% cheaper than 10 years ago
+• Job creation in manufacturing, installation, and maintenance
+• Energy independence and price stability
+
+**Scientific Advances:**
+• Photovoltaic efficiency has improved from 6% to over 22% in commercial panels
+• Perovskite solar cells showing potential for 30%+ efficiency
+• Solar storage integration with battery technology advancing rapidly
+
+**Community Impact:**
+• Decentralized energy production empowers local communities
+• Rural electrification in developing regions
+• Reduced grid strain during peak hours
+
+The latest developments include floating solar farms, agrivoltaics (combining agriculture with solar), and transparent solar panels for building integration."""
+
+        # Environmental responses
+        elif any(word in input_lower for word in ['environment', 'climate', 'pollution', 'sustainability', 'carbon', 'green']):
+            return """As TurboTalk AI, I focus on environmental solutions for a sustainable future:
+
+**Current Environmental Challenges:**
+• Climate change accelerating - global temperatures rising 1.1°C since pre-industrial times
+• Biodiversity loss at unprecedented rates
+• Ocean acidification and plastic pollution
+• Deforestation and habitat destruction
+
+**Science-Based Solutions:**
+• Renewable energy transition (solar, wind, hydro)
+• Carbon capture and storage technologies
+• Circular economy principles - reduce, reuse, recycle
+• Nature-based solutions like reforestation and wetland restoration
+
+**Community Actions:**
+• Local environmental monitoring and citizen science
+• Sustainable transportation and energy choices
+• Supporting environmental education and awareness
+• Advocating for environmental policies
+
+Together, we can create positive environmental impact through science and community action."""
+
+        # Health and wellness responses
+        elif any(word in input_lower for word in ['health', 'medical', 'wellness', 'nutrition', 'fitness', 'mental']):
+            return """Health and wellness are fundamental to thriving communities:
+
+**Holistic Health Approach:**
+• Physical health through regular exercise and balanced nutrition
+• Mental health awareness and stress management
+• Social connections and community support
+• Preventive care and regular health screenings
+
+**Science-Based Health Tips:**
+• 150 minutes of moderate exercise weekly (WHO recommendation)
+• Mediterranean diet linked to longevity and disease prevention
+• 7-9 hours of quality sleep essential for cognitive function
+• Mindfulness and meditation reduce stress hormones
+
+**Community Health Initiatives:**
+• Public health education and awareness campaigns
+• Access to clean water, air, and safe environments
+• Mental health support systems and resources
+• Health equity and inclusive healthcare access
+
+Remember: I provide general information, not medical advice. Always consult healthcare professionals for personal health concerns."""
+
+        # Community problem solving
+        elif any(word in input_lower for word in ['community', 'social', 'problem', 'society', 'help', 'volunteer']):
+            return """Community problem-solving requires collaborative approaches:
+
+**Identifying Community Needs:**
+• Conduct community assessments and surveys
+• Listen to diverse voices and perspectives
+• Map existing resources and gaps
+• Prioritize urgent and impactful issues
+
+**Science-Based Problem Solving:**
+• Data collection and analysis for evidence-based decisions
+• Pilot programs and iterative improvements
+• Impact measurement and evaluation
+• Scaling successful interventions
+
+**Community Engagement Strategies:**
+• Town halls and public forums
+• Volunteer coordination and skill-sharing
+• Partnerships between organizations, schools, and businesses
+• Digital platforms for collaboration and communication
+
+**Success Examples:**
+• Community gardens addressing food security
+• Citizen science projects monitoring local environment
+• Peer support programs for mental health
+• Local renewable energy cooperatives
+
+Every community challenge is an opportunity for collective innovation and positive change."""
+
+        # General TurboTalk response
+        else:
+            return f"""Hello! I'm TurboTalk AI from Rango Productions, created by Rushi Bhavinkumar Soni. I'm designed to help with Science for Society initiatives.
+
+**About Your Question: "{inputs}"**
+
+I can help you explore this topic through multiple lenses:
+
+🔬 **Science Education**: Understanding the scientific principles and latest research
+🌱 **Environmental Impact**: How this relates to sustainability and climate action  
+💚 **Health & Wellness**: Connections to physical and mental wellbeing
+🤝 **Community Solutions**: How this can benefit society and local communities
+
+I combine advanced AI reasoning with web research to provide comprehensive, up-to-date information. I'm particularly focused on making science accessible and actionable for real-world problem solving.
+
+Would you like me to explore any specific aspect of your question in more detail? I can provide deeper analysis on the scientific, environmental, health, or community dimensions of this topic."""
+
+        return "I'm here to help with science, environment, health, and community topics. Please feel free to ask me anything!"
+
 def setup_logging():
     """Configure enhanced logging for the application"""
     logging.basicConfig(level=logging.INFO)

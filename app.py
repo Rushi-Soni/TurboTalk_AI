@@ -448,7 +448,7 @@ class ChatAPI:
         }
 
     def send_request(self, inputs, conversation_history, session_id):
-        """Send request to the API and process response"""
+        """Send request to the API and process response with fallback"""
         formatted_history = [
             {'role': msg['role'], 'content': msg['content']}
             for msg in conversation_history[-10:]  # Keep last 10 messages for context
@@ -474,18 +474,20 @@ class ChatAPI:
                 
                 if response.status_code == 200:
                     return self._process_response(response)
-                elif response.status_code in (401, 429):
+                elif response.status_code in (401, 403, 429):
                     self.logger.warning(f"Attempt {attempt + 1}: Status {response.status_code}")
                     if attempt == Config.MAX_RETRIES - 1:
-                        return "Server is busy. Please try again later."
+                        # Fallback to local processing
+                        return self._fallback_response(inputs, conversation_history)
                     time.sleep(2 ** attempt)  # Exponential backoff
                 else:
-                    return f"Error: {response.status_code}"
+                    if attempt == Config.MAX_RETRIES - 1:
+                        return self._fallback_response(inputs, conversation_history)
                     
             except requests.exceptions.RequestException as e:
                 self.logger.error(f"Request error: {str(e)}")
                 if attempt == Config.MAX_RETRIES - 1:
-                    return "Network error. Please check your connection."
+                    return self._fallback_response(inputs, conversation_history)
 
     def _process_response(self, response):
         """Process the API response"""

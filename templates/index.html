@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurboTalk AI - Science for Society</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        /* DeepSeek-inspired Dark Theme with Advanced Animations */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-blue: #4a9eff;
+            --accent-purple: #8b5cf6;
+            --accent-green: #22c55e;
+            --border-color: #404040;
+            --shadow-light: rgba(74, 158, 255, 0.1);
+            --shadow-medium: rgba(74, 158, 255, 0.2);
+            --thinking-bg: #2a1f3d;
+            --response-bg: #1f2937;
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1; 
+            }
+            50% { 
+                opacity: 0.5; 
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 5px var(--shadow-light); 
+            }
+            50% { 
+                box-shadow: 0 0 20px var(--shadow-medium); 
+            }
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-left: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            flex: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 500px;
+        }
+
+        .messages-area {
+            flex: 1;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 400px;
+            max-height: 600px;
+        }
+
+        /* Message Types */
+        .message {
+            animation: fadeInUp 0.4s ease-out;
+            margin-bottom: 1rem;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: var(--accent-blue);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 18px 18px 4px 18px;
+            max-width: 80%;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            box-shadow: 0 2px 8px rgba(74, 158, 255, 0.3);
+        }
+
+        .thinking-message {
+            align-self: flex-start;
+            background: var(--thinking-bg);
+            border: 1px solid var(--accent-purple);
+            padding: 1rem 1.25rem;
+            border-radius: 18px 18px 18px 4px;
+            max-width: 85%;
+            position: relative;
+        }
+
+        .thinking-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--accent-purple);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .thinking-icon {
+            animation: pulse 2s infinite;
+        }
+
+        .thinking-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: var(--response-bg);
+            border: 1px solid var(--border-color);
+            padding: 1rem 1.25rem;
+            border-radius: 18px 18px 18px 4px;
+            max-width: 90%;
+            position: relative;
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--accent-green);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .response-content {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        /* Loading Indicator */
+        .loading-indicator {
+            display: none;
+            align-self: flex-start;
+            background: var(--bg-tertiary);
+            padding: 1rem 1.25rem;
+            border-radius: 18px 18px 18px 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            animation: pulse 1.4s infinite;
+        }
+
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Input Area */
+        .input-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            line-height: 1.4;
+            resize: vertical;
+            min-height: 50px;
+            max-height: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px var(--shadow-light);
+            animation: glow 2s infinite;
+        }
+
+        .message-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--shadow-medium);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--accent-purple);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-blue);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .user-message, .thinking-message, .bot-message {
+                max-width: 95%;
+            }
+            
+            .input-wrapper {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .send-button {
+                align-self: stretch;
+            }
+        }
+
+        /* Special Effects */
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Status Indicators */
+        .status-thinking {
+            color: var(--accent-purple);
+        }
+
+        .status-responding {
+            color: var(--accent-green);
+        }
+
+        .status-ready {
+            color: var(--accent-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">T</div>
+                <div class="logo-text">TurboTalk AI</div>
+                <div class="tagline">Science for Society • Powered by Rango Productions</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Welcome Section -->
+        <section class="welcome-section" id="welcomeSection">
+            <h1 class="welcome-title">Hi, I'm TurboTalk AI</h1>
+            <p class="welcome-subtitle">Your intelligent assistant for Science, Environment, Health & Community Solutions</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔬</div>
+                    <div class="feature-title">Science Education</div>
+                    <div class="feature-desc">Physics, Chemistry, Biology & Tech</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌱</div>
+                    <div class="feature-title">Environment</div>
+                    <div class="feature-desc">Climate, Sustainability & Conservation</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💚</div>
+                    <div class="feature-title">Health & Wellness</div>
+                    <div class="feature-desc">Medical Info, Mental Health & Nutrition</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤝</div>
+                    <div class="feature-title">Community</div>
+                    <div class="feature-desc">Social Issues & Problem Solving</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="messages-area" id="messagesArea">
+                <!-- Loading Indicator -->
+                <div class="loading-indicator" id="loadingIndicator">
+                    <div class="loading-dots">
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Ask me anything about science, environment, health, or community issues..."
+                        rows="2"
+                    ></textarea>
+                    <button class="send-button" id="sendButton">
+                        <span>Send</span>
+                        <span>✨</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>TurboTalk AI • Created by <a href="#">Rushi Bhavinkumar Soni</a> • Rango Productions</p>
+    </footer>
+
+    <script>
+        $(document).ready(function() {
+            const messagesArea = $('#messagesArea');
+            const messageInput = $('#messageInput');
+            const sendButton = $('#sendButton');
+            const loadingIndicator = $('#loadingIndicator');
+            const welcomeSection = $('#welcomeSection');
+
+            let isProcessing = false;
+
+            // Auto-resize textarea
+            messageInput.on('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            // Send message function
+            function sendMessage() {
+                const message = messageInput.val().trim();
+                if (!message || isProcessing) return;
+
+                // Hide welcome section on first message
+                welcomeSection.fadeOut(300);
+
+                // Add user message
+                addUserMessage(message);
+                messageInput.val('');
+                messageInput.css('height', 'auto');
+
+                // Set processing state
+                isProcessing = true;
+                sendButton.prop('disabled', true);
+                loadingIndicator.show();
+
+                // Scroll to bottom
+                scrollToBottom();
+
+                // Send request
+                $.ajax({
+                    url: '/chat',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ message: message }),
+                    success: function(response) {
+                        loadingIndicator.hide();
+                        
+                        // Show thinking summary first
+                        if (response.thinking_summary) {
+                            addThinkingMessage(response.thinking_summary);
+                            
+                            // After a delay, show the final response
+                            setTimeout(() => {
+                                if (response.final_response) {
+                                    addBotMessageWithTyping(response.final_response);
+                                }
+                            }, 1000);
+                        } else if (response.final_response) {
+                            addBotMessageWithTyping(response.final_response);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        loadingIndicator.hide();
+                        let errorMessage = "I apologize, but I encountered an error. Please try again.";
+                        
+                        if (xhr.status === 0) {
+                            errorMessage = "Connection error. Please check your internet connection and try again.";
+                        } else if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMessage = xhr.responseJSON.error;
+                        }
+                        
+                        addBotMessage(errorMessage);
+                    },
+                    complete: function() {
+                        isProcessing = false;
+                        sendButton.prop('disabled', false);
+                    }
+                });
+            }
+
+            // Add user message
+            function addUserMessage(message) {
+                const messageElement = $(`
+                    <div class="message user-message fade-in">
+                        ${escapeHtml(message)}
+                    </div>
+                `);
+                messagesArea.append(messageElement);
+                scrollToBottom();
+            }
+
+            // Add thinking message
+            function addThinkingMessage(thinking) {
+                const messageElement = $(`
+                    <div class="message thinking-message fade-in">
+                        <div class="thinking-header">
+                            <span class="thinking-icon">🤔</span>
+                            <span>Thinking Process</span>
+                        </div>
+                        <div class="thinking-content">${escapeHtml(thinking)}</div>
+                    </div>
+                `);
+                messagesArea.append(messageElement);
+                scrollToBottom();
+            }
+
+            // Add bot message with typing animation
+            function addBotMessageWithTyping(message) {
+                const messageElement = $(`
+                    <div class="message bot-message fade-in">
+                        <div class="response-header">
+                            <span>🤖</span>
+                            <span class="status-responding">TurboTalk AI</span>
+                        </div>
+                        <div class="response-content"></div>
+                    </div>
+                `);
+                
+                messagesArea.append(messageElement);
+                const contentElement = messageElement.find('.response-content');
+                
+                // Simulate typing with randomized speed
+                typeMessage(contentElement, message);
+                scrollToBottom();
+            }
+
+            // Add bot message instantly
+            function addBotMessage(message) {
+                const messageElement = $(`
+                    <div class="message bot-message fade-in">
+                        <div class="response-header">
+                            <span>🤖</span>
+                            <span class="status-ready">TurboTalk AI</span>
+                        </div>
+                        <div class="response-content">${escapeHtml(message)}</div>
+                    </div>
+                `);
+                messagesArea.append(messageElement);
+                scrollToBottom();
+            }
+
+            // Typing animation with randomized speed
+            function typeMessage(element, message, index = 0) {
+                if (index < message.length) {
+                    element.text(element.text() + message.charAt(index));
+                    
+                    // Randomized typing speed between 0.5 and 2.5 characters per second
+                    const minSpeed = 400;  // 2.5 chars/sec
+                    const maxSpeed = 2000; // 0.5 chars/sec
+                    const randomDelay = Math.random() * (maxSpeed - minSpeed) + minSpeed;
+                    
+                    setTimeout(() => {
+                        typeMessage(element, message, index + 1);
+                    }, randomDelay);
+                    
+                    // Scroll to bottom during typing
+                    if (index % 10 === 0) {
+                        scrollToBottom();
+                    }
+                } else {
+                    // Update status to ready when typing is complete
+                    element.closest('.bot-message').find('.status-responding')
+                        .removeClass('status-responding')
+                        .addClass('status-ready');
+                }
+            }
+
+            // Scroll to bottom
+            function scrollToBottom() {
+                messagesArea.animate({
+                    scrollTop: messagesArea[0].scrollHeight
+                }, 300);
+            }
+
+            // Escape HTML
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Event listeners
+            sendButton.on('click', sendMessage);
+            
+            messageInput.on('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Focus on input
+            messageInput.focus();
+
+            // Add initial bot message after a delay
+            setTimeout(() => {
+                addBotMessage("Welcome! I'm TurboTalk AI, your intelligent assistant for Science, Environment, Health, and Community solutions. I can help you with educational content, environmental awareness, health guidance, and community problem-solving. What would you like to explore today?");
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
